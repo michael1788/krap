@@ -8,6 +8,7 @@ __pycache__/
 
 # data stuff
 *.csv
+*.xlsx
 
 # C extensions
 *.so
