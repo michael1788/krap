@@ -1,0 +1,25 @@
+Dimensional Data Report Version: 3.0
+Source File: C:\Users\sunee\Desktop\Devora\20240910_bleach_100hairs_dimensions.uvc
+Record	Description	Slice No.	Slice Position	Start Angle	End Angle	Elapsed Time	Cross-Sectional Area	Mean Diameter	Max. Diameter	Min. Diameter	Std. Deviation	Measurements
+				Degrees	Degrees	Seconds	Sq.Microns	Microns	Microns	Microns
+1	Slot  : FDAS770 Double-Ended	1	24	0	360	0	2985.7	61.94	65.15	58.35	1.9700	243	
+1	Slot  : FDAS770 Double-Ended	2	156	0	360	0	2651.1	59.00	64.80	52.09	3.9550	244	
+1	Slot  : FDAS770 Double-Ended	3	288	0	360	0	2880.4	60.40	63.34	57.90	1.7300	242	
+1	Slot  : FDAS770 Double-Ended	4	420	0	360	0	2648.8	60.95	71.09	47.44	8.5650	241	
+1	Slot  : FDAS770 Double-Ended	5	552	0	360	0	2505.5	59.05	70.75	45.09	8.9700	240	
+2	Slot  : FDAS770 Double-Ended	1	24	0	360	88	3186.3	66.00	80.59	50.34	10.2950	242	
+2	Slot  : FDAS770 Double-Ended	2	156	0	360	88	3098.8	64.34	78.69	50.14	9.6800	241	
+2	Slot  : FDAS770 Double-Ended	3	288	0	360	88	3261.6	67.00	77.84	53.35	7.8750	241	
+2	Slot  : FDAS770 Double-Ended	4	420	0	360	88	3162.0	68.30	80.44	50.05	10.3949	240	
+2	Slot  : FDAS770 Double-Ended	5	552	0	360	88	3114.4	66.40	77.60	51.10	8.6549	239	
+3	Slot  : FDAS770 Double-Ended	1	24	0	360	158	3218.2	67.14	83.30	49.19	11.4249	242	
+3	Slot  : FDAS770 Double-Ended	2	200	0	360	158	3199.9	64.04	73.29	55.59	5.8200	242	
+3	Slot  : FDAS770 Double-Ended	3	376	0	360	158	3126.6	67.19	79.30	50.20	10.2650	239	
+3	Slot  : FDAS770 Double-Ended	4	552	0	360	158	3195.7	67.34	79.94	50.90	9.3299	237	
+4	Slot  : FDAS770 Double-Ended	1	24	0	360	243	2992.9	66.90	81.60	46.70	10.7749	242	
+4	Slot  : FDAS770 Double-Ended	2	288	0	360	243	3192.3	66.65	77.79	52.25	8.3149	242	
+4	Slot  : FDAS770 Double-Ended	3	552	0	360	243	3146.9	67.34	79.50	50.40	9.2799	238	
+5	Slot  : FDAS770 Double-Ended	1	201	0	360	309	3159.1	64.09	72.75	55.29	5.8350	235	
+5	Slot  : FDAS770 Double-Ended	2	378	0	360	309	3167.2	67.69	78.84	51.15	9.5850	238	
+6	Slot  : FDAS770 Double-Ended	1	201	0	360	407	3218.5	64.04	72.80	56.29	5.5999	238	
+6	Slot  : FDAS770 Double-Ended	2	378	0	360	407	3238.9	68.04	79.69	51.75	9.6450	239	
