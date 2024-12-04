@@ -1,0 +1,76 @@
+Record	Sample	Description	Min. Diameter	Min. Diameter SD	Max. Diameter	Max. Diameter SD	Mean Cross-Section	Break Extension	Break Value
+1	1	"Slot 1 : MTT Extension Method, Cycle: 1"	48.6	1.361	79.76	0.624	3044.06	41	66.65
+2	2	"Slot 2 : MTT Extension Method, Cycle: 1"	62.88	2.298	124.47	4.13	6142.84	44.45	125.05
+3	3	"Slot 3 : MTT Extension Method, Cycle: 1"	60.27	0.822	77.83	1.781	3684	47.59	89.9
+4	4	"Slot 4 : MTT Extension Method, Cycle: 1"	61.22	3.429	73.22	1.803	3522.95	46.85	71.25
+5	5	"Slot 5 : MTT Extension Method, Cycle: 1"	60.88	0.866	84.36	0.753	4033.5	40.79	86.75
+6	6	"Slot 6 : MTT Extension Method, Cycle: 1"	60.75	1.735	79.7	3.354	3800.09	53.59	84.35
+7	7	"Slot 7 : MTT Extension Method, Cycle: 1"	56.38	1.723	87.52	5.473	3878.91	41.79	75.8
+8	8	"Slot 8 : MTT Extension Method, Cycle: 1"	69.11	1.012	102.93	3.349	5588.48	43.81	122.95
+9	9	"Slot 9 : MTT Extension Method, Cycle: 1"	53.53	1.305	95.22	0.852	4003.48	29.41	66.75
+10	10	"Slot 10 : MTT Extension Method, Cycle: 1"	53.59	3.161	89.03	2.287	3750.83	18.49	59.85
+11	11	"Slot 11 : MTT Extension Method, Cycle: 1"	53.83	0.722	76.57	0.946	3237.44	48.32	73.45
+12	12	"Slot 12 : MTT Extension Method, Cycle: 1"	57.56	1.45	67.64	2.806	3057.94	43.69	63.25
+13	13	"Slot 13 : MTT Extension Method, Cycle: 1"	58.44	3.394	68.44	0.141	3141.49	41.71	60.85
+14	14	"Slot 14 : MTT Extension Method, Cycle: 1"	57.63	1.865	71.9	3.739	3250.5	20.65	49.35
+15	15	"Slot 15 : MTT Extension Method, Cycle: 1"	47.24	1.082	93.4	4.06	3463.49	35.36	68.1
+16	16	"Slot 16 : MTT Extension Method, Cycle: 1"	61.84	1.218	86.1	3.804	4180.02	47.25	80.5
+17	17	"Slot 17 : MTT Extension Method, Cycle: 1"	63.41	0.944	81.61	5.231	4066.74	40.71	71.65
+18	18	"Slot 18 : MTT Extension Method, Cycle: 1"	57.28	0.786	92.78	0.926	4173.83	47.47	93
+19	19	"Slot 19 : MTT Extension Method, Cycle: 1"	54.63	0.252	87.26	3.64	3743.89	44.03	85.1
+20	20	"Slot 20 : MTT Extension Method, Cycle: 1"	69	2.255	92.6	5.038	5013.94	52.62	111.85
+21	21	"Slot 21 : MTT Extension Method, Cycle: 1"	59.63	3.822	95.31	5.07	4466.59	12.31	66.6
+22	22	"Slot 22 : MTT Extension Method, Cycle: 1"	58.88	0.451	80.3	1.774	3713.53	47.52	73
+23	23	"Slot 23 : MTT Extension Method, Cycle: 1"	53.9	0	59.84	0	2533.2	34.25	46.65
+24		tag							
+25	25	"Slot 25 : MTT Extension Method, Cycle: 1"	60.93	0.258	77.8	2.883	3722.94	49.75	83.95
+26	26	"Slot 26 : MTT Extension Method, Cycle: 1"	66.65	2.828	83.87	1.81	4388.31	47.13	87.85
+27		tag							
+28	28	"Slot 28 : MTT Extension Method, Cycle: 1"	65.2	0.532	100.83	3.871	5162.84	52.62	131.85
+29	29	"Slot 29 : MTT Extension Method, Cycle: 1"	64.2	2.996	90.96	1.148	4584.82	40.2	87.05
+30	30	"Slot 30 : MTT Extension Method, Cycle: 1"	55.91	0.415	69.58	4.861	3054.5	47.76	69.25
+31	31	"Slot 31 : MTT Extension Method, Cycle: 1"	58.87	1.607	76.9	2.302	3553.45	46.24	71.5
+32	32	"Slot 32 : MTT Extension Method, Cycle: 1"	65.64	1.222	82.86	1.245	4272.48	56.87	96.7
+33	33	"Slot 33 : MTT Extension Method, Cycle: 1"	67.72	3.352	82.14	0.99	4367.49	39.44	81.6
+34	34	"Slot 34 : MTT Extension Method, Cycle: 1"	53	0.455	79.56	2.545	3311.19	42.69	68.9
+35	35	"Slot 35 : MTT Extension Method, Cycle: 1"	66	0.734	88.03	0.715	4563.03	50.35	98.75
+36	36	"Slot 36 : MTT Extension Method, Cycle: 1"	62.61	0.387	94.26	1.276	4635.66	41.21	92.95
+37		tag							
+38	38	"Slot 38 : MTT Extension Method, Cycle: 1"	64.86	2.349	83.38	0.935	4247.2	57.17	100.75
+39	39	"Slot 39 : MTT Extension Method, Cycle: 1"	66.5	0	73.55	0	3841.44	37.49	68.9
+40	40	"Slot 40 : MTT Extension Method, Cycle: 1"	59.37	0.396	66.6	0.771	3105.38	41.42	52.45
+41	41	"Slot 41 : MTT Extension Method, Cycle: 1"	53.58	0.177	66.1	0.926	2781.06	51.65	53.4
+42	42	"Slot 42 : MTT Extension Method, Cycle: 1"	58.03	2.539	103.1	1.826	4696.53	37.93	85.35
+43	43	"Slot 43 : MTT Extension Method, Cycle: 1"	52.9	3.857	68.56	1.572	2846.8	50.5	53.85
+44	44	"Slot 44 : MTT Extension Method, Cycle: 1"	50.75	3.819	70.7	2.897	2811.96	43.57	56.45
+45	45	"Slot 45 : MTT Extension Method, Cycle: 1"	71	4.553	100.61	8.873	5589.19	42.46	94.2
+46	46	"Slot 46 : MTT Extension Method, Cycle: 1"	65.3	0	78.4	0	4020.86	25.02	51.45
+47		tag							
+48	48	"Slot 48 : MTT Extension Method, Cycle: 1"	56.49	2.465	88.83	0.929	3941.04	45.08	73.55
+49	49	"Slot 49 : MTT Extension Method, Cycle: 1"	52.68	0.491	76.34	0.65	3158.73	54.79	67.35
+50	50	"Slot 50 : MTT Extension Method, Cycle: 1"	84.6	1.131	103.93	4.49	6907.26	41.67	132.7
+51	51	"Slot 51 : MTT Extension Method, Cycle: 1"	56.08	3.166	82.46	5.392	3623.57	46.19	65.75
+52	52	"Slot 52 : MTT Extension Method, Cycle: 1"	67.6	3.303	110.68	1.848	5876.82	41.45	96.4
+53	53	"Slot 53 : MTT Extension Method, Cycle: 1"	65.6	0.755	77.1	1.565	3972.19	56.87	81.35
+54	54	"Slot 54 : MTT Extension Method, Cycle: 1"	47.76	0.497	72.61	2.926	2723.27	58.53	55.65
+55	55	"Slot 55 : MTT Extension Method, Cycle: 1"	51.76	3.499	83.26	1.917	3382.64	51.13	65.95
+56	56	"Slot 56 : MTT Extension Method, Cycle: 1"	46.33	2.603	76.61	2.209	2786.49	49.55	62.05
+57	57	"Slot 57 : MTT Extension Method, Cycle: 1"	50.31	2.013	79.08	0.956	3124.48	42.36	53.8
+58	58	"Slot 58 : MTT Extension Method, Cycle: 1"	63.56	1.78	115.21	3.804	5748.52	9.45	77.6
+59	59	"Slot 59 : MTT Extension Method, Cycle: 1"	60.51	2.292	84.93	1.396	4035.08	56.28	92.35
+60	60	"Slot 60 : MTT Extension Method, Cycle: 1"	47.04	5.367	66.6	2.609	2455.12	35.87	43.65
+61	61	"Slot 61 : MTT Extension Method, Cycle: 1"	56.21	2.945	75.47	1.449	3331.58	53.76	64.5
+62	62	"Slot 62 : MTT Extension Method, Cycle: 1"	65.25	2.622	104.25	1.782	5340.98	49.74	103
+63	63	"Slot 63 : MTT Extension Method, Cycle: 1"	63.6	0	93.65	0	4677.94	43.53	80.35
+64	64	"Slot 64 : MTT Extension Method, Cycle: 1"	63.13	1.237	72.52	2.998	3593.96	50.13	67.7
+65	65	"Slot 65 : MTT Extension Method, Cycle: 1"	50.39	1.114	63.35	0.926	2507.63	17.78	36.45
+66	66	"Slot 66 : MTT Extension Method, Cycle: 1"	52.03	4.598	88.21	1.195	3603.76	40.33	72.75
+67	67	"Slot 67 : MTT Extension Method, Cycle: 1"	55.27	1.856	82.46	3.014	3577.82	40.24	60.4
+68	68	"Slot 68 : MTT Extension Method, Cycle: 1"	60.06	1.981	86.77	1.921	4092.43	54.21	85.15
+69	69	"Slot 69 : MTT Extension Method, Cycle: 1"	57.98	1.798	80.05	3.228	3642.53	52.91	80.1
+70	70	"Slot 70 : MTT Extension Method, Cycle: 1"	56.6	0	69.07	0.601	3070.63	41.85	56.15
+71	71	"Slot 71 : MTT Extension Method, Cycle: 1"	61.68	0.869	79.36	0.898	3844.18	42.89	80.85
+72	72	"Slot 72 : MTT Extension Method, Cycle: 1"	51.6	1.166	74.51	1.603	3019.97	47.51	60.95
+73	73	"Slot 73 : MTT Extension Method, Cycle: 1"	54.53	2.476	73.45	1.054	3145.91	50.81	61.5
+74		tag							
+75	75	"Slot 75 : MTT Extension Method, Cycle: 1"	62.93	1.324	75.58	1.86	3734.32	53.06	84.1
