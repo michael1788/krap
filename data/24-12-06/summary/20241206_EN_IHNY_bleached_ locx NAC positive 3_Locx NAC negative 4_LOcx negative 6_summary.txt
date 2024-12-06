@@ -1,0 +1,78 @@
+Summary Data Ver: 1.3
+Source File: D:\20241206_EN_IHNY_bleached_ locx NAC positive 3_Locx NAC negative 4_LOcx negative 6.uvc
+Record	Sample	Description	Min. Diameter	Min. Diameter SD	Max. Diameter	Max. Diameter SD	Mean Cross-Section	Break Extension	Break Value
+1	1	Slot 1 : MTT Extension Method, Cycle: 1	55.88	0.771	95.11	2.501	4174.73	42.77	87.30	
+2	2	Slot 2 : MTT Extension Method, Cycle: 1	68.18	0.701	102.88	4.020	5508.43	53.41	112.80	
+3	3	Slot 3 : MTT Extension Method, Cycle: 1	65.06	3.452	98.45	3.037	5029.58	49.47	114.30	
+4	4	Slot 4 : MTT Extension Method, Cycle: 1	65.65	0.000	87.39	0.000	4505.95	8.18	67.05	
+5	5	Slot 5 : MTT Extension Method, Cycle: 1	56.88	3.007	77.03	0.375	3441.10	49.97	73.00	
+6	6	Slot 6 : MTT Extension Method, Cycle: 1	58.38	1.275	85.05	2.076	3898.53	38.27	77.60	
+7	7	Slot 7 : MTT Extension Method, Cycle: 1	64.13	0.856	100.98	2.378	5084.83	40.65	107.05	
+8		tag	
+9	9	Slot 9 : MTT Extension Method, Cycle: 1	51.62	1.833	74.23	1.024	3008.29	37.73	58.55	
+10	10	Slot 10 : MTT Extension Method, Cycle: 1	72.24	2.346	121.29	1.824	6883.01	44.46	137.65	
+11	11	Slot 11 : MTT Extension Method, Cycle: 1	63.54	2.123	101.66	0.286	5073.24	50.66	103.45	
+12	12	Slot 12 : MTT Extension Method, Cycle: 1	57.34	0.305	82.10	3.522	3697.02	45.18	79.45	
+13	13	Slot 13 : MTT Extension Method, Cycle: 1	63.03	2.067	93.54	3.166	4632.04	54.11	95.65	
+14	14	Slot 14 : MTT Extension Method, Cycle: 1	62.96	1.975	89.59	4.498	4435.13	55.93	108.05	
+15	15	Slot 15 : MTT Extension Method, Cycle: 1	48.29	1.146	70.68	4.744	2683.61	42.52	60.65	
+16	16	Slot 16 : MTT Extension Method, Cycle: 1	69.78	2.110	85.56	1.882	4687.29	51.56	100.90	
+17	17	Slot 17 : MTT Extension Method, Cycle: 1	65.33	0.557	100.17	1.959	5140.19	57.22	117.20	
+18		tag	
+19	19	Slot 19 : MTT Extension Method, Cycle: 1	67.93	2.535	108.55	5.538	5784.78	14.27	81.15	
+20	20	Slot 20 : MTT Extension Method, Cycle: 1	44.01	3.489	74.32	1.235	2570.08	42.04	51.10	
+21	21	Slot 21 : MTT Extension Method, Cycle: 1	58.21	2.810	79.01	5.116	3614.90	55.90	71.90	
+22	22	Slot 22 : MTT Extension Method, Cycle: 1	60.40	2.680	69.82	1.103	3313.01	50.95	72.50	
+23	23	Slot 23 : MTT Extension Method, Cycle: 1	75.82	1.732	88.79	0.148	5287.89	40.48	106.05	
+24	24	Slot 24 : MTT Extension Method, Cycle: 1	56.86	0.749	80.37	1.553	3589.38	49.51	76.25	
+25	25	Slot 25 : MTT Extension Method, Cycle: 1	62.34	1.431	85.18	2.448	4168.96	51.65	97.80	
+26	26	Slot 26 : MTT Extension Method, Cycle: 1	65.88	1.859	103.00	2.591	5328.94	45.15	111.35	
+27		tag	
+28	28	Slot 28 : MTT Extension Method, Cycle: 1	59.36	1.807	77.03	2.719	3590.01	50.57	71.15	
+29	29	Slot 29 : MTT Extension Method, Cycle: 1	63.44	2.623	84.10	2.051	4188.55	51.65	93.25	
+30	30	Slot 30 : MTT Extension Method, Cycle: 1	56.75	2.475	68.72	3.288	3059.97	44.07	63.30	
+31	31	Slot 31 : MTT Extension Method, Cycle: 1	46.85	1.479	62.87	1.106	2312.94	49.77	53.15	
+32	32	Slot 32 : MTT Extension Method, Cycle: 1	66.29	2.221	88.34	3.530	4598.54	44.74	87.60	
+33	33	Slot 33 : MTT Extension Method, Cycle: 1	49.63	1.277	58.81	2.130	2292.20	51.35	50.45	
+34	34	Slot 34 : MTT Extension Method, Cycle: 1	53.47	2.866	70.88	6.289	2967.36	55.06	64.95	
+35	35	Slot 35 : MTT Extension Method, Cycle: 1	75.20	3.107	101.15	5.708	5965.68	40.64	102.60	
+36	36	Slot 36 : MTT Extension Method, Cycle: 1	58.06	4.704	71.23	3.414	3246.08	40.21	61.55	
+37	37	Slot 37 : MTT Extension Method, Cycle: 1	57.68	2.247	78.94	2.079	3578.04	49.89	81.05	
+38	38	Slot 38 : MTT Extension Method, Cycle: 1	48.43	1.245	76.03	1.806	2891.11	1.93	29.75	
+39	39	Slot 39 : MTT Extension Method, Cycle: 1	64.26	2.529	98.51	4.159	4967.40	49.46	109.60	
+40	40	Slot 40 : MTT Extension Method, Cycle: 1	58.74	2.965	80.33	8.672	3700.11	35.09	56.45	
+41	41	Slot 41 : MTT Extension Method, Cycle: 1	75.68	1.662	96.76	3.177	5749.84	43.32	112.25	
+42	42	Slot 42 : MTT Extension Method, Cycle: 1	56.79	3.299	84.24	4.850	3756.55	37.67	65.55	
+43	43	Slot 43 : MTT Extension Method, Cycle: 1	55.13	4.231	84.55	0.131	3660.70	46.68	78.60	
+44	44	Slot 44 : MTT Extension Method, Cycle: 1	73.08	7.101	107.15	4.866	6132.00	47.81	123.70	
+45	45	Slot 45 : MTT Extension Method, Cycle: 1	59.68	5.450	90.48	4.382	4229.98	38.96	74.50	
+46	46	Slot 46 : MTT Extension Method, Cycle: 1	44.67	8.867	96.50	2.906	3375.28	41.44	67.50	
+47	47	Slot 47 : MTT Extension Method, Cycle: 1	60.22	1.659	98.71	2.128	4667.72	52.41	99.80	
+48	48	Slot 48 : MTT Extension Method, Cycle: 1	66.60	3.640	96.55	2.387	5045.35	43.04	96.25	
+49	49	Slot 49 : MTT Extension Method, Cycle: 1	59.53	3.812	82.66	1.329	3864.63	42.63	69.45	
+50	50	Slot 50 : MTT Extension Method, Cycle: 1	68.60	4.542	85.63	1.632	4610.21	48.68	89.80	
+51	51	Slot 51 : MTT Extension Method, Cycle: 1	58.38	1.580	75.30	0.577	3452.42	53.56	76.55	
+52	52	Slot 52 : MTT Extension Method, Cycle: 1	67.75	1.952	74.11	0.678	3943.69	48.53	86.10	
+53	53	Slot 53 : MTT Extension Method, Cycle: 1	51.78	1.611	70.01	1.806	2848.81	35.65	48.55	
+54	54	Slot 54 : MTT Extension Method, Cycle: 1	61.30	4.688	101.49	4.120	4894.88	26.10	66.65	
+55	55	Slot 55 : MTT Extension Method, Cycle: 1	65.85	4.303	90.83	2.653	4691.67	41.53	100.60	
+56	56	Slot 56 : MTT Extension Method, Cycle: 1	52.18	2.634	62.48	2.713	2557.01	55.07	54.60	
+57	57	Slot 57 : MTT Extension Method, Cycle: 1	68.08	2.300	86.38	6.798	4610.39	54.34	102.60	
+58	58	Slot 58 : MTT Extension Method, Cycle: 1	80.41	1.976	91.26	1.408	5762.00	41.79	112.10	
+59	59	Slot 59 : MTT Extension Method, Cycle: 1	65.03	5.004	83.78	3.510	4277.03	49.47	89.50	
+60	60	Slot 60 : MTT Extension Method, Cycle: 1	63.31	2.168	96.38	1.379	4791.81	39.13	94.55	
+61	61	Slot 61 : MTT Extension Method, Cycle: 1	69.65	2.004	87.52	2.025	4788.71	47.11	102.70	
+62	62	Slot 62 : MTT Extension Method, Cycle: 1	55.44	0.999	86.70	3.163	3774.14	43.62	62.25	
+63	63	Slot 63 : MTT Extension Method, Cycle: 1	57.04	0.997	65.02	0.679	2912.83	58.31	67.75	
+64	64	Slot 64 : MTT Extension Method, Cycle: 1	52.19	2.045	68.46	4.365	2801.87	43.56	58.05	
+65	65	Slot 65 : MTT Extension Method, Cycle: 1	56.45	1.106	76.27	2.493	3380.46	47.86	72.05	
+66	66	Slot 66 : MTT Extension Method, Cycle: 1	54.88	2.688	68.59	6.434	2949.43	45.37	65.05	
+67	67	Slot 67 : MTT Extension Method, Cycle: 1	51.60	3.731	81.71	3.647	3318.11	1.52	27.45	
+68	68	Slot 68 : MTT Extension Method, Cycle: 1	49.35	0.000	58.40	0.000	2263.55	49.46	54.65	
+69	69	Slot 69 : MTT Extension Method, Cycle: 1	55.10	2.977	75.24	1.232	3254.29	47.81	76.60	
+70	70	Slot 70 : MTT Extension Method, Cycle: 1	49.38	1.315	91.64	1.868	3554.93	53.30	68.85	
+71		tag	
+72	72	Slot 72 : MTT Extension Method, Cycle: 1	56.26	1.604	89.68	2.029	3961.01	57.91	90.10	
+73	73	Slot 73 : MTT Extension Method, Cycle: 1	57.98	2.558	97.08	4.075	4415.89	45.04	87.40	
+74	74	Slot 74 : MTT Extension Method, Cycle: 1	64.45	1.181	86.88	1.303	4397.16	42.05	91.80	
+75	75	Slot 75 : MTT Extension Method, Cycle: 1	56.20	0.283	63.17	0.099	2788.27	50.07	53.05	
