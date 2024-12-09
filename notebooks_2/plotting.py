@@ -1,8 +1,58 @@
-
 import matplotlib.pyplot as plt
 import scipy.stats
 from itertools import combinations
 import numpy as np
+import pandas as pd
+
+
+def clean_single(df):
+    # remove first rows
+    df_clean = df.drop(index=range(10))
+    df_clean.reset_index(drop=True, inplace=True)
+    # set the header to the rows with RECORD
+    df_clean.columns = df_clean.iloc[0]
+    df_clean = df_clean[1:]
+    df_clean.reset_index(drop=True, inplace=True)
+    # removes row with the unit
+    df_clean = df_clean.drop(index=0)
+    df_clean.reset_index(drop=True, inplace=True)
+    # remove empty rows at the end
+    mask = pd.to_numeric(df_clean['RECORD'], errors='coerce').notnull()
+    df_clean = df_clean[mask]
+    df_clean.reset_index(drop=True, inplace=True)
+    # save all the values as float 
+    df_clean = df_clean.astype(float)
+
+    return df_clean
+
+def clean_triple(df):
+    # remove first rows
+    df_clean = df.drop(index=range(2))
+    df_clean.reset_index(drop=True, inplace=True)
+    # set the header to the rows with RECORD
+    df_clean.columns = df_clean.iloc[0]
+    df_clean = df_clean[1:]
+    df_clean.reset_index(drop=True, inplace=True)
+    # remove the first row
+    df_clean = df_clean.drop(index=0)
+    df_clean.reset_index(drop=True, inplace=True)
+    # removes row with the unit
+    df_clean = df_clean.drop(index=0)
+    df_clean.reset_index(drop=True, inplace=True)
+    # remove empty rows at the end
+    mask = pd.to_numeric(df_clean['RECORD'], errors='coerce').notnull()
+    df_clean = df_clean[mask]
+    df_clean.reset_index(drop=True, inplace=True)
+    # save all the values as float 
+    df_clean = df_clean.astype(float)
+
+    return df_clean
+
+def format_number(number):
+    """Format number: use scientific notation if more than 4 digits"""
+    if abs(number) >= 10000:
+        return f"{number:.2e}"
+    return f"{number:.2f}"
 
 def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(10, 6)):
     """Create a compact boxplot with statistical test, median values, and spaced significance indicators"""
@@ -99,8 +149,8 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
         median = df[df[group_column] == group][metric_column].median()
         y_pos = ax.get_ylim()[1]
         
-        # Add median value
-        ax.text(i+1, y_pos*1.02, f'Median: {round(median, 2)}',
+        # Add median value with conditional scientific notation
+        ax.text(i+1, y_pos*1.02, f'Median: {format_number(median)}',
                 horizontalalignment='center', fontsize=9)
         
         # Add significance markers if they exist
