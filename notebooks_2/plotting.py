@@ -54,7 +54,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     significance_dict = {group: [] for group in group_names}
     
     # List of base markers to use for different pairs
-    base_markers = ['†', '‡', '§', '¶', '#', '@']
+    base_markers = ['†', '‡', '§', '¶', '#', '@', '©', '®', '°', '∞', '∆', '∑', '√', '∫']
     marker_idx = 0
     
     # Define colors for different pairs (using a colorful qualitative colormap)
@@ -122,7 +122,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     plt.suptitle('')
     plt.title('')
-    plt.xlabel(group_column, fontsize=10)
+    plt.xlabel('Experiment name', fontsize=10)
     plt.ylabel(metric_column.replace('_', ' ').title(), fontsize=10)
     ax.yaxis.grid(True, linestyle='--', alpha=0.3)
     
