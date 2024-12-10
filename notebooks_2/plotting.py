@@ -109,7 +109,8 @@ def format_number(number):
     return f"{number:.2f}"
 
 def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(10, 6)):
-    """Create a compact boxplot with statistical test, median values, and spaced significance indicators"""
+    """Create a compact boxplot with statistical test, median values, spaced significance indicators,
+    and individual data points (outliers removed)"""
     
     # Create plot
     fig, ax = plt.subplots(figsize=figsize)
@@ -129,8 +130,17 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     colors = plt.cm.Set3(np.linspace(0, 1, len(unique_base_names)))
     color_dict = dict(zip(unique_base_names, colors))
     
-    # Create boxplot
-    bp = ax.boxplot([df[df[group_column] == group][metric_column] for group in df[group_column].unique()],
+    # Create lists to store cleaned data for boxplot
+    cleaned_data = []
+    group_names = df[group_column].unique()
+    
+    for group in group_names:
+        group_data = df[df[group_column] == group][metric_column]
+        cleaned_group_data = remove_outliers(group_data)
+        cleaned_data.append(cleaned_group_data)
+    
+    # Create boxplot with cleaned data
+    bp = ax.boxplot(cleaned_data,
                     patch_artist=True,
                     medianprops={'color': 'red', 'linewidth': 1.5},
                     boxprops={'color': 'black'},
@@ -139,17 +149,30 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
                     showfliers=False)
     
     # Color the boxes
-    for patch, group_name in zip(bp['boxes'], df[group_column].unique()):
+    for patch, group_name in zip(bp['boxes'], group_names):
         base_name = group_name.split('*')[0]
         patch.set_facecolor(color_dict[base_name])
         patch.set_alpha(0.7)
     
+    # Add individual points with jitter (using cleaned data)
+    for i, (group_name, group_data) in enumerate(zip(group_names, cleaned_data)):
+        base_name = group_name.split('*')[0]
+        
+        # Create jitter
+        x = np.random.normal(i + 1, 0.04, size=len(group_data))
+        
+        # Plot points with black edges
+        ax.scatter(x, group_data, 
+                  color=color_dict[base_name],
+                  edgecolor='black',
+                  linewidth=0.5,
+                  alpha=0.5,
+                  s=20,
+                  zorder=2)
+    
     # Remove top and right spines
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    
-    # Get unique groups
-    group_names = df[group_column].unique()
     
     # Add median values and set x-tick labels
     ax.set_xticklabels(group_names, rotation=45, ha='right')
@@ -168,13 +191,13 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     pairs = list(combinations(group_names, 2))
     
     for pair_idx, (group1_name, group2_name) in enumerate(pairs):
-        group1_data = df[df[group_column] == group1_name][metric_column]
-        group2_data = df[df[group_column] == group2_name][metric_column]
+        idx1 = list(group_names).index(group1_name)
+        idx2 = list(group_names).index(group2_name)
         
-        group1_clean = remove_outliers(group1_data)
-        group2_clean = remove_outliers(group2_data)
+        group1_data = cleaned_data[idx1]
+        group2_data = cleaned_data[idx2]
         
-        stat, p_value = scipy.stats.mannwhitneyu(group1_clean, group2_clean, alternative='two-sided')
+        stat, p_value = scipy.stats.mannwhitneyu(group1_data, group2_data, alternative='two-sided')
         
         if p_value < 0.05:
             # Use next base marker in the list
@@ -200,7 +223,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     # Add median values and significance markers
     for i, group in enumerate(group_names):
-        median = df[df[group_column] == group][metric_column].median()
+        median = np.median(cleaned_data[i])
         y_pos = ax.get_ylim()[1]
         
         # Add median value with conditional scientific notation
