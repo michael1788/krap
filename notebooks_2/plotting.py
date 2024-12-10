@@ -4,10 +4,46 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
+import pandas as pd
+import numpy as np
+
+def replace_invalid_floats(df):
+    """
+    Replace '1.#IOe+000' and '-1.#IOe+000' values with numpy.nan in a DataFrame.
+    Works on both string representations and actual float values.
+    
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        The input DataFrame containing invalid float values
+        
+    Returns:
+    --------
+    pandas.DataFrame
+        A new DataFrame with invalid float values replaced by nan
+    """
+    # Create a copy to avoid modifying the original DataFrame
+    df_cleaned = df.copy()
+    
+    # Replace string representations
+    df_cleaned = df_cleaned.replace(['1.#IOe+000', '-1.#IOe+000'], np.nan)
+    
+    # For each numeric column, replace invalid float values
+    numeric_columns = df_cleaned.select_dtypes(include=[np.number]).columns
+    for col in numeric_columns:
+        # Check for invalid float values
+        mask = df_cleaned[col].apply(lambda x: 
+            isinstance(x, float) and (str(x) == '1.#IOe+000' or str(x) == '-1.#IOe+000'))
+        # Replace with nan where mask is True
+        df_cleaned.loc[mask, col] = np.nan
+    
+    return df_cleaned
 
 def clean_single(df):
+    # replace invalid floats
+    df_clean = replace_invalid_floats(df)
     # remove first rows
-    df_clean = df.drop(index=range(10))
+    df_clean = df_clean.drop(index=range(10))
     df_clean.reset_index(drop=True, inplace=True)
     # set the header to the rows with RECORD
     df_clean.columns = df_clean.iloc[0]
@@ -26,8 +62,10 @@ def clean_single(df):
     return df_clean
 
 def clean_triple(df):
+    # replace invalid floats
+    df_clean = replace_invalid_floats(df)
     # remove first rows
-    df_clean = df.drop(index=range(2))
+    df_clean = df_clean.drop(index=range(2))
     df_clean.reset_index(drop=True, inplace=True)
     # set the header to the rows with RECORD
     df_clean.columns = df_clean.iloc[0]
