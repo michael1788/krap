@@ -7,6 +7,28 @@ import pandas as pd
 import pandas as pd
 import numpy as np
 
+
+def get_df_from_file(filepath, skip):
+    # First, read all lines as strings
+    raw_data = []
+    with open(filepath, 'r') as f:
+        # Skip the first skip lines
+        for _ in range(skip):
+            next(f)
+        # Read remaining lines
+        for line in f:
+            fields = line.strip().split('\t')
+            while len(fields) < 15:  # Pad with None if there are too few
+                fields.append(None)
+            raw_data.append(fields)
+
+    # Convert to DataFrame with the same parameters you were using
+    df = pd.DataFrame(raw_data)
+    # Apply the same na_values treatment you had before
+    df = df.replace(['', 'NA', 'null'], np.nan)
+
+    return df
+
 def replace_invalid_floats(df):
     """
     Replace '1.#IOe+000' and '-1.#IOe+000' values with numpy.nan in a DataFrame.
@@ -42,9 +64,6 @@ def replace_invalid_floats(df):
 def clean_single(df):
     # replace invalid floats
     df_clean = replace_invalid_floats(df)
-    # remove first rows
-    df_clean = df_clean.drop(index=range(10))
-    df_clean.reset_index(drop=True, inplace=True)
     # set the header to the rows with RECORD
     df_clean.columns = df_clean.iloc[0]
     df_clean = df_clean[1:]
@@ -64,9 +83,6 @@ def clean_single(df):
 def clean_triple(df):
     # replace invalid floats
     df_clean = replace_invalid_floats(df)
-    # remove first rows
-    df_clean = df_clean.drop(index=range(2))
-    df_clean.reset_index(drop=True, inplace=True)
     # set the header to the rows with RECORD
     df_clean.columns = df_clean.iloc[0]
     df_clean = df_clean[1:]
@@ -189,7 +205,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
         
         # Add median value with conditional scientific notation
         ax.text(i+1, y_pos*1.02, f'Median: {format_number(median)}',
-                horizontalalignment='center', fontsize=9)
+                horizontalalignment='center', fontsize=8)
         
         # Add significance markers if they exist
         if significance_dict[group]:
