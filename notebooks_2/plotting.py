@@ -8,6 +8,18 @@ import pandas as pd
 import numpy as np
 
 
+def switch_units_triple(df):
+    # multiple all the values in the column
+    # BREAK STRESS by 10^6/101.971621297792 / comes from what Devora was doing in her file
+    df['BREAK STRESS'] = df['BREAK STRESS'] * 10**6/101.971621297792
+    # and EMOD to gigapascal
+    df['ELASTIC EMOD'] = df['ELASTIC EMOD'] * 1e-9
+    return df
+
+def switch_units_single(df):
+    df['EMOD(*)(#)'] = df['EMOD(*)(#)'] * 1e-9
+    return df
+
 def get_df_from_file(filepath, skip):
     # First, read all lines as strings
     raw_data = []
@@ -77,6 +89,8 @@ def clean_single(df):
     df_clean.reset_index(drop=True, inplace=True)
     # save all the values as float 
     df_clean = df_clean.astype(float)
+    # swtich units
+    df_clean = switch_units_single(df_clean)
 
     return df_clean
 
@@ -99,36 +113,42 @@ def clean_triple(df):
     df_clean.reset_index(drop=True, inplace=True)
     # save all the values as float 
     df_clean = df_clean.astype(float)
+    # switch units for break stress
+    df_clean = switch_units_triple(df_clean)
 
     return df_clean
 
 def format_number(number):
     """Format number: use scientific notation if more than 4 digits"""
     if abs(number) >= 10000:
-        return f"{number:.2e}"
-    return f"{number:.2f}"
+        return f"{number:.1e}"
+    return f"{number:.1f}"
+
+# Function to remove outliers
+def remove_outliers(data):
+    Q1 = np.percentile(data, 25)
+    Q3 = np.percentile(data, 75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    to_keep = data[(data >= lower_bound) & (data <= upper_bound)]
+    removed = data[(data < lower_bound) | (data > upper_bound)]
+    assert len(to_keep) + len(removed) == len(data)
+
+    return to_keep, removed
 
 def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(10, 6)):
-    """Create a compact boxplot with statistical test, median values, spaced significance indicators,
+    """Create a compact boxplot with statistical test, median values, vertically stacked significance indicators,
     and individual data points (outliers removed)"""
     
     # Create plot
     fig, ax = plt.subplots(figsize=figsize)
     
-    # Function to remove outliers
-    def remove_outliers(data):
-        Q1 = np.percentile(data, 25)
-        Q3 = np.percentile(data, 75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
-        return data[(data >= lower_bound) & (data <= upper_bound)]
-    
-    # Get unique base names and assign colors
-    base_names = [name.split('*')[0] for name in df[group_column].unique()]
-    unique_base_names = list(dict.fromkeys(base_names))  # Preserve order
-    colors = plt.cm.Set3(np.linspace(0, 1, len(unique_base_names)))
-    color_dict = dict(zip(unique_base_names, colors))
+    # Get unique first letters and assign colors
+    first_letters = sorted(set(name[0].upper() for name in df[group_column].unique()))
+    colors = plt.cm.Set3(np.linspace(0, 1, len(first_letters)))
+    color_dict = dict(zip(first_letters, colors))
     
     # Create lists to store cleaned data for boxplot
     cleaned_data = []
@@ -136,7 +156,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     for group in group_names:
         group_data = df[df[group_column] == group][metric_column]
-        cleaned_group_data = remove_outliers(group_data)
+        cleaned_group_data, removed = remove_outliers(group_data)
         cleaned_data.append(cleaned_group_data)
     
     # Create boxplot with cleaned data
@@ -148,22 +168,22 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
                     capprops={'color': 'black'},
                     showfliers=False)
     
-    # Color the boxes
+    # Color the boxes based on first letter
     for patch, group_name in zip(bp['boxes'], group_names):
-        base_name = group_name.split('*')[0]
-        patch.set_facecolor(color_dict[base_name])
+        first_letter = group_name[0].upper()
+        patch.set_facecolor(color_dict[first_letter])
         patch.set_alpha(0.7)
     
     # Add individual points with jitter (using cleaned data)
     for i, (group_name, group_data) in enumerate(zip(group_names, cleaned_data)):
-        base_name = group_name.split('*')[0]
+        first_letter = group_name[0].upper()
         
         # Create jitter
         x = np.random.normal(i + 1, 0.04, size=len(group_data))
         
         # Plot points with black edges
         ax.scatter(x, group_data, 
-                  color=color_dict[base_name],
+                  color=color_dict[first_letter],
                   edgecolor='black',
                   linewidth=0.5,
                   alpha=0.5,
@@ -176,6 +196,29 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     # Add median values and set x-tick labels
     ax.set_xticklabels(group_names, rotation=45, ha='right')
+    
+    # Helper function to group markers
+    def group_markers(markers_list):
+        """Group identical markers together and organize different markers in rows"""
+        if not markers_list:
+            return []
+            
+        # Sort markers to group identical ones together
+        sorted_markers = sorted(markers_list, key=lambda x: x[0])
+        
+        # Group identical markers
+        grouped = []
+        current_group = [sorted_markers[0]]
+        
+        for marker, color in sorted_markers[1:]:
+            if marker == current_group[0][0]:
+                current_group.append((marker, color))
+            else:
+                grouped.append(current_group)
+                current_group = [(marker, color)]
+        grouped.append(current_group)
+        
+        return grouped
     
     # Dictionary to store significance markers and their colors for each group
     significance_dict = {group: [] for group in group_names}
@@ -227,25 +270,25 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
         y_pos = ax.get_ylim()[1]
         
         # Add median value with conditional scientific notation
-        ax.text(i+1, y_pos*1.02, f'Median: {format_number(median)}',
+        ax.text(i+1, y_pos*1.02, f'M: {format_number(median)}',
                 horizontalalignment='center', fontsize=8)
         
         # Add significance markers if they exist
         if significance_dict[group]:
-            # Join all markers with spaces between them
-            marker_text = '  '.join(marker for marker, _ in significance_dict[group])
-            colors = [color for _, color in significance_dict[group]]
+            grouped_markers = group_markers(significance_dict[group])
             
-            # Calculate total width of the marker text
-            total_width = len(marker_text) * 0.05  # Approximate width per character
-            start_x = i + 1 - total_width/2
-            
-            # Place each marker with its color
-            current_x = start_x
-            for marker, color in significance_dict[group]:
-                ax.text(current_x, y_pos*1.08, marker,
-                       horizontalalignment='left', fontsize=19, color=color)
-                current_x += len(marker) * 0.05 + 0.1  # Add space between markers
+            # Place each row of markers
+            for row_idx, marker_group in enumerate(grouped_markers):
+                # Join identical markers in this row
+                marker_text = ''.join(marker for marker, _ in marker_group)
+                color = marker_group[0][1]  # Use color of first marker in group
+                
+                # Calculate position for this row
+                vertical_offset = 1.08 + (row_idx * 0.06)  # Increase vertical spacing between rows
+                
+                # Center the marker group over the box
+                ax.text(i + 1, y_pos * vertical_offset, marker_text,
+                       horizontalalignment='center', fontsize=12, color=color)
     
     plt.suptitle('')
     plt.title('')
@@ -254,11 +297,11 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     ax.yaxis.grid(True, linestyle='--', alpha=0.3)
     
     # Add legend for significance levels
-    legend_text = 'Significance levels:\nOne symbol: p < 0.05\nTwo symbols: p < 0.01\nThree symbols: p < 0.001'
+    legend_text = '1 symbol: p < 0.05\n2 symbols: p < 0.01\n3 symbols: p < 0.001'
     plt.figtext(0.99, 0.01, legend_text, 
                 horizontalalignment='right', 
                 verticalalignment='bottom',
-                fontsize=8,
+                fontsize=6,
                 bbox=dict(facecolor='white', alpha=0.8, edgecolor='none'))
 
     if ymin is not None and ymax is not None:
@@ -266,4 +309,86 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     plt.tight_layout()
     
-    return fig, ax
+    return fig, ax, removed
+
+def create_scatter_plot(df, x_col, y_col, save_dir=None, filename=None, figsize=(10, 6)):
+    """
+    Create a scatter plot with correlation coefficient for two columns in a dataframe
+    and optionally save it to a specified directory.
+    
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        The input dataframe containing the data
+    x_col : str
+        Name of the column to plot on x-axis
+    y_col : str
+        Name of the column to plot on y-axis
+    save_dir : str, optional
+        Directory path where to save the plot. If None, plot is only displayed
+    filename : str, optional
+        Name of the file to save the plot. If None and save_dir is specified,
+        a default name will be generated
+    figsize : tuple, optional
+        Size of the figure (width, height) in inches
+        
+    Returns:
+    --------
+    None (displays and optionally saves the plot)
+    """
+    # Calculate correlation
+    correlation = df[x_col].corr(df[y_col])
+    
+    # Create the scatter plot
+    plt.figure(figsize=figsize)
+    ax = plt.gca()
+    
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    # Create the scatter plot
+    plt.scatter(df[x_col], df[y_col], alpha=0.5)
+    
+    # Add labels and title
+    plt.xlabel(x_col)
+    plt.ylabel(y_col)
+    plt.title(f'{y_col} vs {x_col}')
+    
+    # Add correlation text
+    plt.text(0.02, 0.98, f'Correlation: {correlation:.3f}', 
+             transform=plt.gca().transAxes,
+             verticalalignment='top',
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    # Add grid for better readability
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    # Adjust layout to prevent text cutoff
+    plt.tight_layout()
+    
+    # Save the plot if directory is specified
+    if save_dir:
+        # Create directory if it doesn't exist
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Generate default filename if none provided
+        if filename is None:
+            filename = f'scatter_{x_col}_vs_{y_col}.png'
+        
+        # Ensure filename has an extension
+        if not filename.endswith(('.png', '.jpg', '.jpeg', '.pdf')):
+            filename += '.png'
+        
+        # Create full path
+        filepath = os.path.join(save_dir, filename)
+        
+        # Save the plot
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        print(f"Plot saved to: {filepath}")
+    
+    # Show the plot
+    plt.show()
+    
+    # Close the figure to free memory
+    plt.close()
