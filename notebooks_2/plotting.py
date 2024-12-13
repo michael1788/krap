@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import scipy.stats
 from itertools import combinations
@@ -121,8 +122,8 @@ def clean_triple(df):
 def format_number(number):
     """Format number: use scientific notation if more than 4 digits"""
     if abs(number) >= 10000:
-        return f"{number:.1e}"
-    return f"{number:.1f}"
+        return f"{number:.2e}"
+    return f"{number:.2f}"
 
 # Function to remove outliers
 def remove_outliers(data):
@@ -138,9 +139,93 @@ def remove_outliers(data):
 
     return to_keep, removed
 
-def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(10, 6)):
-    """Create a compact boxplot with statistical test, median values, vertically stacked significance indicators,
+def create_scatter_plot(df, x_col, y_col, save_dir=None, filename=None, figsize=(10, 6), show=False, verbose=False):
+    """
+    Create a scatter plot with correlation coefficient for two columns in a dataframe
+    and optionally save it to a specified directory.
+    
+    Parameters:
+    -----------
+    df : pandas.DataFrame
+        The input dataframe containing the data
+    x_col : str
+        Name of the column to plot on x-axis
+    y_col : str
+        Name of the column to plot on y-axis
+    save_dir : str, optional
+        Directory path where to save the plot. If None, plot is only displayed
+    filename : str, optional
+        Name of the file to save the plot. If None and save_dir is specified,
+        a default name will be generated
+    figsize : tuple, optional
+        Size of the figure (width, height) in inches
+        
+    Returns:
+    --------
+    None (displays and optionally saves the plot)
+    """
+    # Calculate correlation
+    correlation = df[x_col].corr(df[y_col])
+    
+    # Create the scatter plot
+    plt.figure(figsize=figsize)
+    ax = plt.gca()
+    
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    # Create the scatter plot
+    plt.scatter(df[x_col], df[y_col], alpha=0.5)
+    
+    # Add labels and title
+    plt.xlabel(x_col)
+    plt.ylabel(y_col)
+    plt.title(f'{y_col} vs {x_col}')
+    
+    # Add correlation text
+    plt.text(0.02, 0.98, f'Correlation: {correlation:.3f}', 
+             transform=plt.gca().transAxes,
+             verticalalignment='top',
+             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    # Add grid for better readability
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    # Adjust layout to prevent text cutoff
+    plt.tight_layout()
+    
+    # Save the plot if directory is specified
+    if save_dir:
+        # Create directory if it doesn't exist
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Generate default filename if none provided
+        if filename is None:
+            filename = f'scatter_{x_col}_vs_{y_col}.png'
+        
+        # Ensure filename has an extension
+        if not filename.endswith(('.png', '.jpg', '.jpeg', '.pdf')):
+            filename += '.png'
+        
+        # Create full path
+        filepath = os.path.join(save_dir, filename)
+        
+        # Save the plot
+        plt.savefig(filepath, bbox_inches='tight', dpi=300)
+        if verbose:
+            print(f"Plot saved to: {filepath}")
+    
+    # Show the plot
+    if show:
+        plt.show()
+        plt.close()
+
+def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(10, 6), verbose=False):
+    """Create a compact boxplot with statistical test, median values, mean ± std, vertically stacked significance indicators,
     and individual data points (outliers removed)"""
+    
+    # [Previous code remains the same until the text positioning section]
     
     # Create plot
     fig, ax = plt.subplots(figsize=figsize)
@@ -243,14 +328,11 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
         stat, p_value = scipy.stats.mannwhitneyu(group1_data, group2_data, alternative='two-sided')
         
         if p_value < 0.05:
-            # Use next base marker in the list
             current_marker = base_markers[marker_idx % len(base_markers)]
             marker_idx += 1
             
-            # Get color for this pair
             current_color = pair_colors[pair_idx]
             
-            # Add appropriate number of markers based on p-value
             if p_value < 0.001:
                 marker_with_significance = current_marker * 3
             elif p_value < 0.01:
@@ -258,35 +340,37 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
             else:
                 marker_with_significance = current_marker
                 
-            # Add significance markers and colors to both groups
             significance_dict[group1_name].append((marker_with_significance, current_color))
             significance_dict[group2_name].append((marker_with_significance, current_color))
             
-            print(f"Statistical significance between {group1_name} and {group2_name}: p = {p_value:.4f}")
+            print(f"Stats. significance: {group1_name} and {group2_name}: p = {p_value:.4f}")
     
-    # Add median values and significance markers
+    # Add median values, means, and significance markers
     for i, group in enumerate(group_names):
         median = np.median(cleaned_data[i])
+        mean = np.mean(cleaned_data[i])
+        std = np.std(cleaned_data[i])
         y_pos = ax.get_ylim()[1]
         
-        # Add median value with conditional scientific notation
-        ax.text(i+1, y_pos*1.02, f'M: {format_number(median)}',
+        # Add median value with conditional scientific notation (moved higher)
+        ax.text(i+1, y_pos*1.15, f'M: {format_number(median)}',
+                horizontalalignment='center', fontsize=8)
+        
+        # Add mean ± std below median (moved higher)
+        ax.text(i+1, y_pos*1.08, f'μ: {format_number(mean)}±{format_number(std)}',
                 horizontalalignment='center', fontsize=8)
         
         # Add significance markers if they exist
         if significance_dict[group]:
             grouped_markers = group_markers(significance_dict[group])
             
-            # Place each row of markers
             for row_idx, marker_group in enumerate(grouped_markers):
-                # Join identical markers in this row
                 marker_text = ''.join(marker for marker, _ in marker_group)
-                color = marker_group[0][1]  # Use color of first marker in group
+                color = marker_group[0][1]
                 
-                # Calculate position for this row
-                vertical_offset = 1.08 + (row_idx * 0.06)  # Increase vertical spacing between rows
+                # Increased base offset for significance markers
+                vertical_offset = 1.22 + (row_idx * 0.06)
                 
-                # Center the marker group over the box
                 ax.text(i + 1, y_pos * vertical_offset, marker_text,
                        horizontalalignment='center', fontsize=12, color=color)
     
@@ -310,85 +394,3 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     plt.tight_layout()
     
     return fig, ax, removed
-
-def create_scatter_plot(df, x_col, y_col, save_dir=None, filename=None, figsize=(10, 6)):
-    """
-    Create a scatter plot with correlation coefficient for two columns in a dataframe
-    and optionally save it to a specified directory.
-    
-    Parameters:
-    -----------
-    df : pandas.DataFrame
-        The input dataframe containing the data
-    x_col : str
-        Name of the column to plot on x-axis
-    y_col : str
-        Name of the column to plot on y-axis
-    save_dir : str, optional
-        Directory path where to save the plot. If None, plot is only displayed
-    filename : str, optional
-        Name of the file to save the plot. If None and save_dir is specified,
-        a default name will be generated
-    figsize : tuple, optional
-        Size of the figure (width, height) in inches
-        
-    Returns:
-    --------
-    None (displays and optionally saves the plot)
-    """
-    # Calculate correlation
-    correlation = df[x_col].corr(df[y_col])
-    
-    # Create the scatter plot
-    plt.figure(figsize=figsize)
-    ax = plt.gca()
-    
-    # Remove top and right spines
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    
-    # Create the scatter plot
-    plt.scatter(df[x_col], df[y_col], alpha=0.5)
-    
-    # Add labels and title
-    plt.xlabel(x_col)
-    plt.ylabel(y_col)
-    plt.title(f'{y_col} vs {x_col}')
-    
-    # Add correlation text
-    plt.text(0.02, 0.98, f'Correlation: {correlation:.3f}', 
-             transform=plt.gca().transAxes,
-             verticalalignment='top',
-             bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
-    
-    # Add grid for better readability
-    plt.grid(True, linestyle='--', alpha=0.7)
-    
-    # Adjust layout to prevent text cutoff
-    plt.tight_layout()
-    
-    # Save the plot if directory is specified
-    if save_dir:
-        # Create directory if it doesn't exist
-        os.makedirs(save_dir, exist_ok=True)
-        
-        # Generate default filename if none provided
-        if filename is None:
-            filename = f'scatter_{x_col}_vs_{y_col}.png'
-        
-        # Ensure filename has an extension
-        if not filename.endswith(('.png', '.jpg', '.jpeg', '.pdf')):
-            filename += '.png'
-        
-        # Create full path
-        filepath = os.path.join(save_dir, filename)
-        
-        # Save the plot
-        plt.savefig(filepath, bbox_inches='tight', dpi=300)
-        print(f"Plot saved to: {filepath}")
-    
-    # Show the plot
-    plt.show()
-    
-    # Close the figure to free memory
-    plt.close()
