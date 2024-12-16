@@ -272,7 +272,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     """Create a compact boxplot with statistical test, median values, mean ± std, vertically stacked significance indicators,
     and individual data points (outliers removed)"""
     
-    # [Previous code remains the same until the text positioning section]
+    print(f"\nCreating boxplot for {metric_column}")
     
     # Create plot
     fig, ax = plt.subplots(figsize=figsize)
@@ -286,10 +286,15 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     cleaned_data = []
     group_names = df[group_column].unique()
     
+    all_removed = []
     for group in group_names:
         group_data = df[df[group_column] == group][metric_column]
         cleaned_group_data, removed = remove_outliers(group_data)
+        print("Removed outliers for", group, ":", removed)
+        all_removed.append(removed)
         cleaned_data.append(cleaned_group_data)
+    # merge the dataframe
+    all_removed = pd.concat(all_removed)
     
     # Create boxplot with cleaned data
     bp = ax.boxplot(cleaned_data,
@@ -395,6 +400,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     # Add median values, means, and significance markers
     for i, group in enumerate(group_names):
         median = np.median(cleaned_data[i])
+        print(f"Median for {group}: {median}")
         mean = np.mean(cleaned_data[i])
         std = np.std(cleaned_data[i])
         y_pos = ax.get_ylim()[1]
@@ -440,4 +446,4 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     plt.tight_layout()
     
-    return fig, ax, removed
+    return fig, ax, all_removed
