@@ -5,9 +5,53 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
-import pandas as pd
-import numpy as np
 
+def add_missing_records(df):
+    """
+    Add rows for missing record numbers in the RECORD column.
+    The function assumes RECORD column should contain consecutive integers from 1 to max(RECORD).
+    
+    Parameters:
+    df (pandas.DataFrame): DataFrame containing a 'RECORD' column
+    
+    Returns:
+    pandas.DataFrame: DataFrame with added rows for missing record numbers
+    """
+    # Ensure RECORD column exists
+    if 'RECORD' not in df.columns:
+        raise ValueError("DataFrame must contain a 'RECORD' column")
+    
+    # Get the current max record number
+    max_record = int(df['RECORD'].max())
+    
+    # Create a set of existing record numbers
+    existing_records = set(df['RECORD'])
+    existing_records = [int(x) for x in existing_records]
+    
+    # Find missing record numbers
+    missing_records = [x for x in range(1, max_record + 1) if x not in existing_records]
+    print(f"Missing records: {missing_records}")
+    
+    # If no missing records, return original dataframe
+    if not missing_records:
+        return df
+    
+    # Create new rows for missing records
+    # Fill other columns with NaN/empty values
+    new_rows = pd.DataFrame({
+        'RECORD': missing_records,
+        **{col: [np.nan] * len(missing_records) for col in df.columns if col != 'RECORD'}
+    })
+    
+    # Concatenate original df with new rows
+    result_df = pd.concat([df, new_rows], ignore_index=True)
+    
+    # Sort by RECORD number
+    result_df = result_df.sort_values('RECORD').reset_index(drop=True)
+    all_records = list(result_df['RECORD'])
+    print(f"Records order check ", all_records[:6])
+    
+    return result_df
 
 def switch_units_triple(df):
     # multiple all the values in the column
@@ -92,6 +136,8 @@ def clean_single(df):
     df_clean = df_clean.astype(float)
     # swtich units
     df_clean = switch_units_single(df_clean)
+    # add missing records
+    df_clean = add_missing_records(df_clean)
 
     return df_clean
 
@@ -116,6 +162,8 @@ def clean_triple(df):
     df_clean = df_clean.astype(float)
     # switch units for break stress
     df_clean = switch_units_triple(df_clean)
+    # add missing records
+    df_clean = add_missing_records(df_clean)
 
     return df_clean
 
@@ -125,7 +173,6 @@ def format_number(number):
         return f"{number:.2e}"
     return f"{number:.2f}"
 
-# Function to remove outliers
 def remove_outliers(data):
     Q1 = np.percentile(data, 25)
     Q3 = np.percentile(data, 75)
