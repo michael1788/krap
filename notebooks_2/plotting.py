@@ -138,6 +138,8 @@ def clean_single(df):
     df_clean = switch_units_single(df_clean)
     # add missing records
     df_clean = add_missing_records(df_clean)
+    # if there is a value 101 in the colum RECORD, delete the row
+    df_clean = df_clean[df_clean['RECORD'] != 101]
 
     return df_clean
 
@@ -164,6 +166,8 @@ def clean_triple(df):
     df_clean = switch_units_triple(df_clean)
     # add missing records
     df_clean = add_missing_records(df_clean)
+    # if there is a value 101 in the colum RECORD, delete the row
+    df_clean = df_clean[df_clean['RECORD'] != 101]
 
     return df_clean
 
