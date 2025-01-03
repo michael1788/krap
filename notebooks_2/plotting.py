@@ -404,17 +404,19 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     # Add median values, means, and significance markers
     for i, group in enumerate(group_names):
         median = np.median(cleaned_data[i])
-        print(f"Median for {group}: {median}")
         mean = np.mean(cleaned_data[i])
         std = np.std(cleaned_data[i])
-        y_pos = ax.get_ylim()[1]
         
-        # Add median value with conditional scientific notation (moved higher)
-        ax.text(i+1, y_pos*1.15, f'M: {format_number(median)}',
+        # Get the actual y-axis limits
+        y_min, y_max = ax.get_ylim()
+        y_range = y_max - y_min
+        
+        # Add median value
+        ax.text(i+1, y_max + y_range*0.02, f'M: {format_number(median)}',
                 horizontalalignment='center', fontsize=8)
         
-        # Add mean ± std below median (moved higher)
-        ax.text(i+1, y_pos*1.08, f'μ: {format_number(mean)}±{format_number(std)}',
+        # Add mean ± std
+        ax.text(i+1, y_max + y_range*0.08, f'μ: {format_number(mean)}±{format_number(std)}',
                 horizontalalignment='center', fontsize=8)
         
         # Add significance markers if they exist
@@ -425,12 +427,21 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
                 marker_text = ''.join(marker for marker, _ in marker_group)
                 color = marker_group[0][1]
                 
-                # Increased base offset for significance markers
-                vertical_offset = 1.22 + (row_idx * 0.06)
+                # Calculate vertical position for significance markers
+                vertical_offset = 0.14 + (row_idx * 0.05)
                 
-                ax.text(i + 1, y_pos * vertical_offset, marker_text,
-                       horizontalalignment='center', fontsize=12, color=color)
+                ax.text(i+1, y_max + y_range*vertical_offset, marker_text,
+                    horizontalalignment='center', fontsize=12, color=color)
+
+    # After all annotations are added, adjust the plot limits
+    max_rows = max(len(group_markers(markers)) if markers else 0 
+                for markers in significance_dict.values())
+    final_offset = 0.14 + (max_rows * 0.05) + 0.05  # Add a small padding at the top
+
+    ax.set_ylim(y_min, y_max + y_range*final_offset)
     
+    #########
+
     plt.suptitle('')
     plt.title('')
     plt.xlabel('Experiment name', fontsize=10)
