@@ -118,7 +118,7 @@ def replace_invalid_floats(df):
     
     return df_cleaned
 
-def clean_single(df):
+def clean_single(df, max_100=True):
     # replace invalid floats
     df_clean = replace_invalid_floats(df)
     # set the header to the rows with RECORD
@@ -138,12 +138,14 @@ def clean_single(df):
     df_clean = switch_units_single(df_clean)
     # add missing records
     df_clean = add_missing_records(df_clean)
-    # if there is a value 101 in the colum RECORD, delete the row
-    df_clean = df_clean[df_clean['RECORD'] != 101]
-
+    
+    if max_100:
+        # if there is a value 101 in the colum RECORD, delete the row
+        df_clean = df_clean[df_clean['RECORD'] != 101]
+        
     return df_clean
 
-def clean_triple(df):
+def clean_triple(df, max_100=True):
     # replace invalid floats
     df_clean = replace_invalid_floats(df)
     # set the header to the rows with RECORD
@@ -166,8 +168,10 @@ def clean_triple(df):
     df_clean = switch_units_triple(df_clean)
     # add missing records
     df_clean = add_missing_records(df_clean)
-    # if there is a value 101 in the colum RECORD, delete the row
-    df_clean = df_clean[df_clean['RECORD'] != 101]
+
+    if max_100:
+        # if there is a value 101 in the colum RECORD, delete the row
+        df_clean = df_clean[df_clean['RECORD'] != 101]
 
     return df_clean
 
@@ -281,10 +285,14 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     # Create plot
     fig, ax = plt.subplots(figsize=figsize)
     
-    # Get unique first letters and assign colors
-    first_letters = sorted(set(name[0].upper() for name in df[group_column].unique()))
-    colors = plt.cm.Set3(np.linspace(0, 1, len(first_letters)))
-    color_dict = dict(zip(first_letters, colors))
+    # Define colors for control and non-control groups
+    control_color = '#E0E0E0'  # light grey
+    experiment_color = '#B2DFDB'  # light teal
+    
+    # Function to check if a name contains control-related words
+    def is_control_group(name):
+        control_terms = ['control', 'controls', 'ctrl']
+        return any(term in name.lower() for term in control_terms)
     
     # Create lists to store cleaned data for boxplot
     cleaned_data = []
@@ -309,36 +317,33 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
                     capprops={'color': 'black'},
                     showfliers=False)
     
-    # Color the boxes based on first letter
+    # Color the boxes based on whether they're control groups
     for patch, group_name in zip(bp['boxes'], group_names):
-        first_letter = group_name[0].upper()
-        patch.set_facecolor(color_dict[first_letter])
+        color = control_color if is_control_group(group_name) else experiment_color
+        patch.set_facecolor(color)
         patch.set_alpha(0.7)
     
     # Add individual points with jitter (using cleaned data)
     for i, (group_name, group_data) in enumerate(zip(group_names, cleaned_data)):
-        first_letter = group_name[0].upper()
+        color = control_color if is_control_group(group_name) else experiment_color
         
         # Create jitter
         x = np.random.normal(i + 1, 0.04, size=len(group_data))
         
         # Plot points with black edges
         ax.scatter(x, group_data, 
-                  color=color_dict[first_letter],
+                  color=color,
                   edgecolor='black',
                   linewidth=0.5,
                   alpha=0.5,
                   s=20,
                   zorder=2)
     
-    # Remove top and right spines
+    # Rest of the function remains the same
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    
-    # Add median values and set x-tick labels
     ax.set_xticklabels(group_names, rotation=45, ha='right')
     
-    # Helper function to group markers
     def group_markers(markers_list):
         """Group identical markers together and organize different markers in rows"""
         if not markers_list:
@@ -440,8 +445,6 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
 
     ax.set_ylim(y_min, y_max + y_range*final_offset)
     
-    #########
-
     plt.suptitle('')
     plt.title('')
     plt.xlabel('Experiment name', fontsize=10)
