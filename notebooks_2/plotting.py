@@ -5,6 +5,14 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
+def reorder_by_names(df, name_list):
+    """
+    Groups rows by name and orders groups according to name_list
+    """
+    mask = pd.CategoricalIndex(df['Name'], 
+                              categories=name_list, 
+                              ordered=True)
+    return df.set_index(mask).sort_index().reset_index(drop=True)
 
 def add_missing_records(df):
     """
