@@ -5,6 +5,139 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
+def write_summary_stats(df, master_file='experiment_summary.xlsx'):
+    """
+    Write summary statistics to a master Excel file, with one line per experimental group.
+    All metrics are written to the same sheet, and new data is appended to existing entries.
+    
+    Parameters:
+    df (pandas.DataFrame): DataFrame containing the experimental data
+    master_file (str): Path to the master Excel file
+    """
+    # Define columns to include
+    base_columns = ['Date', 'Hair', 'Treatment', 'Name']
+    metric_columns = ['ELASTIC EMOD', 'ELASTIC GRADIENT', 'BREAK LOAD',
+                     'BREAK STRESS', 'TOUGHNESS']
+    
+    # Define friendly names mapping
+    metric_friendly_names = {
+        'ELASTIC EMOD': 'Elastic Modulus',
+        'ELASTIC GRADIENT': 'Elastic Gradient',
+        'BREAK LOAD': 'Break Load',
+        'BREAK STRESS': 'Break Stress',
+        'TOUGHNESS': 'Toughness'
+    }
+    
+    # Function to check if a name contains control-related words
+    def is_control_group(name):
+        control_terms = ['control', 'controls', 'ctrl']
+        return any(term in name.lower() for term in control_terms)
+    
+    # Get unique groups, excluding controls
+    groups = [name for name in df['Name'].unique() if not is_control_group(name)]
+    
+    # Create summary DataFrame
+    summary_data = []
+    
+    # Function to remove outliers (same as in boxplot function)
+    def remove_outliers(data):
+        Q1 = data.quantile(0.25)
+        Q3 = data.quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        cleaned_data = data[(data >= lower_bound) & (data <= upper_bound)]
+        removed = data[(data < lower_bound) | (data > upper_bound)]
+        return cleaned_data, removed
+    
+    # Perform statistical tests and calculate summary stats
+    for group in groups:
+        group_data = df[df['Name'] == group]
+        
+        # Get the first occurrence of base columns
+        row_data = {col: group_data[col].iloc[0] for col in base_columns}
+        
+        # Initialize hair count variable
+        hair_count = None
+        
+        # Calculate stats for each metric
+        for metric in metric_columns:
+            if metric in df.columns:
+                # Calculate hair count from the first metric where we remove outliers
+                if hair_count is None:
+                    cleaned_data, _ = remove_outliers(group_data[metric])
+                    hair_count = len(cleaned_data)
+                
+                metric_data = group_data[metric]
+                cleaned_data, _ = remove_outliers(metric_data)
+                
+                # Calculate mean and std, rounded to 1 decimal places
+                mean = round(cleaned_data.mean(), 2)
+                std = round(cleaned_data.std(), 1)
+                
+                # Get friendly name for the metric
+                friendly_name = metric_friendly_names[metric]
+                
+                # Perform statistical test against control
+                control_group = next((name for name in df['Name'].unique() 
+                                   if is_control_group(name)), None)
+                
+                # Initialize significance marker
+                sig_marker = ''
+                
+                if control_group:
+                    control_data = df[df['Name'] == control_group][metric]
+                    control_cleaned, _ = remove_outliers(control_data)
+                    
+                    # Perform Mann-Whitney U test
+                    stat, p_value = scipy.stats.mannwhitneyu(cleaned_data, control_cleaned, 
+                                                     alternative='two-sided')
+                    
+                    # Set significance markers
+                    if p_value < 0.001:
+                        sig_marker = '***'
+                    elif p_value < 0.01:
+                        sig_marker = '**'
+                    elif p_value < 0.05:
+                        sig_marker = '*'
+                
+                # Combine mean, std, and significance into one column
+                row_data[friendly_name] = f"{mean} ± {std} {sig_marker}"
+        
+        # Add hair count as the last column
+        row_data['# of hairs after outliers removal'] = hair_count
+        summary_data.append(row_data)
+    
+    # Create DataFrame from summary data
+    new_summary_df = pd.DataFrame(summary_data)
+    
+    # Load existing file and append new data
+    if os.path.exists(master_file):
+        try:
+            existing_df = pd.read_excel(master_file)
+            
+            # Identify new entries by checking Name and Date
+            existing_entries = existing_df.apply(lambda row: f"{row['Name']}_{row['Date']}", axis=1)
+            new_entries = new_summary_df.apply(lambda row: f"{row['Name']}_{row['Date']}", axis=1)
+            
+            # Only append rows that don't exist yet
+            mask = ~new_entries.isin(existing_entries)
+            if mask.any():
+                combined_df = pd.concat([existing_df, new_summary_df[mask]], ignore_index=True)
+            else:
+                combined_df = existing_df
+        except Exception as e:
+            print(f"Error reading existing file: {e}")
+            combined_df = new_summary_df
+    else:
+        combined_df = new_summary_df
+    
+    # Sort by Date
+    combined_df = combined_df.sort_values('Date')
+    
+    # Write to Excel
+    combined_df.to_excel(master_file, index=False)
+    
 def reorder_by_names(df, name_list):
     """
     Groups rows by name and orders groups according to name_list
@@ -67,6 +200,8 @@ def switch_units_triple(df):
     df['BREAK STRESS'] = df['BREAK STRESS'] * 10**6/101.971621297792
     # and EMOD to gigapascal
     df['ELASTIC EMOD'] = df['ELASTIC EMOD'] * 1e-9
+    # and thouness to mega joules
+    df['TOUGHNESS'] = df['TOUGHNESS'] * 1e-6
     return df
 
 def switch_units_single(df):
@@ -289,7 +424,6 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     and individual data points (outliers removed)"""
     
     print(f"\nCreating boxplot for {metric_column}")
-    
     # Create plot
     fig, ax = plt.subplots(figsize=figsize)
     

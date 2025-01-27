@@ -9,8 +9,11 @@ import plotting as plotting
 
 def master_plots(df, header, ymin, ymax, savepath, show=False, verbose=False):
     fig, ax, removed = plotting.create_boxplot(df, header, ymin, ymax)
+    # create folder specific for other stuff
+    extra_savepath = f"{savepath}extra_information/"
+    os.makedirs(extra_savepath, exist_ok=True)
     #save removed data
-    removed.to_csv(f"{savepath}{header}_removed.csv", index=True)
+    removed.to_csv(f"{extra_savepath}{header}_removed.csv", index=True)
     if verbose:
         print(f"{len(removed)} removed data points for {header}")
     # plot
@@ -50,6 +53,10 @@ if __name__ == "__main__":
         pathfile = f"Pulling data/{date}/{MODE}/"
         root = f"{args.root}/{pathfile}"
 
+        # excel master file to log the summary
+        # shared with oddity
+        path_excel_master = f"{args.root}/Pulling data/0_experiment_summary.xlsx"
+
         all_dfs = []
         all_fns = []
 
@@ -72,6 +79,19 @@ if __name__ == "__main__":
                     raise ValueError(f"Not a {MODE} experiment")
 
                 splitted_name = file.split(args.sep_category)
+                # get the hair name and add it in the df
+                hair_name = splitted_name[1]
+                df["Hair"] = hair_name
+                # get the control condition
+                control = ""
+                for name in splitted_name:
+                    if "control" in name.lower() or "ctrl" in name.lower():
+                        if "aa" in name.lower():
+                            control = "Amonium acetate"
+                        elif "phos" in name.lower():
+                            control = "Phosphate"
+                df["Treatment"] = control
+
                 # get the experiments; i.e. not the date
                 # not the single or triple etc
                 splitted_name = splitted_name[2:-1]
@@ -100,7 +120,9 @@ if __name__ == "__main__":
 
                 df["Name"] = all_names
                 # remove nan
-                df = df.dropna()        
+                df = df.dropna()  
+                # add a column with the date
+                df["Date"] = date
                 # reorder the dataframes if necessary
                 if order is not None:
                     print("reordering")
@@ -110,7 +132,11 @@ if __name__ == "__main__":
 
         # plotting triple sepcific plots
         if MODE == "triple":
-            print("\n\nplotting triple data")
+            print("\n\nUpdating the master excel file")
+            plotting.write_summary_stats(df, 
+                                         master_file=path_excel_master)
+            
+            print("\nplotting triple data")
             for df, name in zip(all_dfs, all_fns):
                 print("\n************************************")
                 print(f"{name}\n")
@@ -187,39 +213,42 @@ if __name__ == "__main__":
                         print("Error:", e)
 
                     # scatter plots
+                    extra_savepath = f"{savepath}extra_information/"
+                    os.makedirs(extra_savepath, exist_ok=True)
+
                     y_col = 'ELASTIC EMOD'
                     x_col = 'MEAN DIAMETER'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'ELASTIC EMOD'
                     x_col = 'MIN DIAMETER'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'ELASTIC EMOD'
                     x_col = 'MAX DIAMETER'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'BREAK STRESS'
                     x_col = 'MEAN DIAMETER'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'BREAK STRESS'
                     x_col = 'MIN DIAMETER'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'BREAK STRESS'
                     x_col = 'MAX DIAMETER'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'BREAK STRESS'
                     x_col = 'RECORD'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                 except:
@@ -290,19 +319,22 @@ if __name__ == "__main__":
                         print("Error:", e)
 
                     # scatter plots
+                    extra_savepath = f"{savepath}extra_information/"
+                    os.makedirs(extra_savepath, exist_ok=True)
+
                     y_col = 'TENSILE_STRENGTH'
                     x_col = 'MEAN AREA'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'EMOD(*)(#)'
                     x_col = 'MEAN AREA'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     y_col = 'BREAK_LOAD'
                     x_col = 'MEAN AREA'
-                    savedir = f"{savepath}correlation_plot/"
+                    savedir = f"{extra_savepath}correlation_plot/"
                     plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                 except:
