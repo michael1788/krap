@@ -1,36 +1,56 @@
-#!/bin/bash
+#!/bin/zsh
 
-# Path to the directory to monitor (update this path)
+# Initialize conda
+source ~/.zshrc
+conda activate krap
+
+# Directory to monitor
 WATCH_DIR="/Users/michaelmoret/Library/CloudStorage/GoogleDrive-michael@externa.bio/.shortcut-targets-by-id/1BdUNsBjDh5Gee_76jCiKB1C_CwG0ercP/Pulling data"
 
-# Path to store the last run state
-STATE_FILE="$HOME/.krap_analysis_state"
+# File to store processed files
+PROCESSED_FILES="$HOME/.krap_processed_files"
 
-# Function to get hash of all .txt files
-get_files_hash() {
-    find "$WATCH_DIR" -name "*.txt" -type f -exec stat -f "%m" {} \; | sort | md5
+# Log file
+LOG_FILE="$HOME/tinyverse/krap/analysis.log"
+
+# Function to log messages
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
 }
 
-# Get current state of files
-current_hash=$(get_files_hash)
+# Create processed files list if it doesn't exist
+touch "$PROCESSED_FILES"
 
-# Check if state file exists and read last state
-if [ -f "$STATE_FILE" ]; then
-    last_hash=$(cat "$STATE_FILE")
-else
-    last_hash=""
-fi
+log "Starting file check..."
 
-# Compare states
-if [ "$current_hash" != "$last_hash" ]; then
-    echo "New files detected, running analysis..."
+# Find all .txt files
+while IFS= read -r -d '' file; do
+    # Get full path
+    full_path=$(realpath "$file")
     
-    # Run your analysis script
-    cd "$(dirname "$0")"  # Change to script directory
-    ./run_plot_analysis.sh
-    
-    # Update state file
-    echo "$current_hash" > "$STATE_FILE"
-else
-    echo "No new files detected. Skipping analysis."
-fi
+    # Check if file has been processed
+    if ! grep -Fxq "$full_path" "$PROCESSED_FILES"; then
+        log "New file found: $full_path"
+        
+        # Get the date directory (parent of the file's directory)
+        date_dir=$(basename "$(dirname "$(dirname "$full_path")")")
+        
+        log "Running analysis for date: $date_dir"
+        
+        # Run the analysis script with the date
+        cd "$(dirname "$0")"
+        python plot_analysis.py --date "$date_dir"
+        
+        # Check if the analysis was successful
+        if [ $? -eq 0 ]; then
+            # Mark file as processed only if analysis was successful
+            echo "$full_path" >> "$PROCESSED_FILES"
+            log "Analysis completed successfully for date: $date_dir"
+        else
+            log "Error: Analysis failed for date: $date_dir"
+        fi
+    fi
+done < <(find "$WATCH_DIR" -type f -name "*.txt" -print0)
+
+log "File check completed"
+echo "----------------------------------------" >> "$LOG_FILE"
