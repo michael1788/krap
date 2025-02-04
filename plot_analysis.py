@@ -34,6 +34,9 @@ def parse_args():
                         default="$")
     parser.add_argument("--sep_count", help="", type=str,required=False,
                         default="%")
+    parser.add_argument("--summary_only", action="store_true",
+                    help="Only output the summary",
+                    default=False)
     parser.add_argument("--root", help="", type=str, required=False,
                         default=f"/Users/michaelmoret/Library/CloudStorage/GoogleDrive-michael@externa.bio/.shortcut-targets-by-id/1BdUNsBjDh5Gee_76jCiKB1C_CwG0ercP")
     return parser.parse_args()
@@ -136,124 +139,125 @@ if __name__ == "__main__":
             plotting.write_summary_stats(df, 
                                          master_file=path_excel_master)
             
-            print("\nplotting triple data")
-            for df, name in zip(all_dfs, all_fns):
-                print("\n************************************")
-                print(f"{name}\n")
-                print(f"df length: {len(df)}")
-                try:
-                    savepath = f"{root}{name}/"
-                    if dev:
-                        savepath = f"{root}dev/"
-                    os.makedirs(savepath, exist_ok=True)
-                    
+            if not args.summary_only:
+                print("\nplotting triple data")
+                for df, name in zip(all_dfs, all_fns):
+                    print("\n************************************")
+                    print(f"{name}\n")
+                    print(f"df length: {len(df)}")
                     try:
-                        header = 'MEAN DIAMETER'
-                        if y_none:
-                            ymin = None
-                            ymax = None
-                        else:
-                            ymin = 20
-                            ymax = 120
-                        master_plots(df, header, ymin, ymax, savepath)
-                    except Exception as e:
-                        print(f"ERROR with {header}")
-                        print("Error:", e)
+                        savepath = f"{root}{name}/"
+                        if dev:
+                            savepath = f"{root}dev/"
+                        os.makedirs(savepath, exist_ok=True)
+                        
+                        try:
+                            header = 'MEAN DIAMETER'
+                            if y_none:
+                                ymin = None
+                                ymax = None
+                            else:
+                                ymin = 20
+                                ymax = 120
+                            master_plots(df, header, ymin, ymax, savepath)
+                        except Exception as e:
+                            print(f"ERROR with {header}")
+                            print("Error:", e)
 
-                    try:
-                        header = 'BREAK STRESS'
-                        if y_none:
-                            ymin = None
-                            ymax = None
-                        else:
-                            ymin = 120
-                            ymax = 280
-                        master_plots(df, header, ymin, ymax, savepath)
-                    except Exception as e:
-                        print(f"ERROR with {header}")
-                        print("Error:", e)
+                        try:
+                            header = 'BREAK STRESS'
+                            if y_none:
+                                ymin = None
+                                ymax = None
+                            else:
+                                ymin = 120
+                                ymax = 280
+                            master_plots(df, header, ymin, ymax, savepath)
+                        except Exception as e:
+                            print(f"ERROR with {header}")
+                            print("Error:", e)
 
-                    try:
-                        header = 'TOUGHNESS'
-                        if y_none:
-                            ymin = None
-                            ymax = None
-                        else:
-                            ymin = None
-                            ymax = None
-                        master_plots(df, header, ymin, ymax, savepath)
-                    except Exception as e:
-                        print(f"ERROR with {header}")
-                        print("Error:", e)
-                    
-                    try:
-                        header = 'ELASTIC GRADIENT'
-                        if y_none:
-                            ymin = None
-                            ymax = None
-                        else:
-                            ymin = 0
-                            ymax =  140
-                        master_plots(df, header, ymin, ymax, savepath)
-                    except Exception as e:
-                        print(f"ERROR with {header}")
-                        print("Error:", e)
+                        try:
+                            header = 'TOUGHNESS'
+                            if y_none:
+                                ymin = None
+                                ymax = None
+                            else:
+                                ymin = None
+                                ymax = None
+                            master_plots(df, header, ymin, ymax, savepath)
+                        except Exception as e:
+                            print(f"ERROR with {header}")
+                            print("Error:", e)
+                        
+                        try:
+                            header = 'ELASTIC GRADIENT'
+                            if y_none:
+                                ymin = None
+                                ymax = None
+                            else:
+                                ymin = 0
+                                ymax =  140
+                            master_plots(df, header, ymin, ymax, savepath)
+                        except Exception as e:
+                            print(f"ERROR with {header}")
+                            print("Error:", e)
 
-                    try:
-                        header = 'ELASTIC EMOD'
-                        if y_none:
-                            ymin = None
-                            ymax = None
-                        else:
-                            ymin = 2.5
-                            ymax =  6.0
-                        master_plots(df, header, ymin, ymax, savepath)
-                    except Exception as e:
-                        print(f"ERROR with {header}")
-                        print("Error:", e)
+                        try:
+                            header = 'ELASTIC EMOD'
+                            if y_none:
+                                ymin = None
+                                ymax = None
+                            else:
+                                ymin = 2.5
+                                ymax =  6.0
+                            master_plots(df, header, ymin, ymax, savepath)
+                        except Exception as e:
+                            print(f"ERROR with {header}")
+                            print("Error:", e)
 
-                    # scatter plots
-                    extra_savepath = f"{savepath}extra_information/"
-                    os.makedirs(extra_savepath, exist_ok=True)
+                        # scatter plots
+                        extra_savepath = f"{savepath}extra_information/"
+                        os.makedirs(extra_savepath, exist_ok=True)
 
-                    y_col = 'ELASTIC EMOD'
-                    x_col = 'MEAN DIAMETER'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'ELASTIC EMOD'
+                        x_col = 'MEAN DIAMETER'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                    y_col = 'ELASTIC EMOD'
-                    x_col = 'MIN DIAMETER'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'ELASTIC EMOD'
+                        x_col = 'MIN DIAMETER'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                    y_col = 'ELASTIC EMOD'
-                    x_col = 'MAX DIAMETER'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'ELASTIC EMOD'
+                        x_col = 'MAX DIAMETER'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                    y_col = 'BREAK STRESS'
-                    x_col = 'MEAN DIAMETER'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'BREAK STRESS'
+                        x_col = 'MEAN DIAMETER'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                    y_col = 'BREAK STRESS'
-                    x_col = 'MIN DIAMETER'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'BREAK STRESS'
+                        x_col = 'MIN DIAMETER'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                    y_col = 'BREAK STRESS'
-                    x_col = 'MAX DIAMETER'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'BREAK STRESS'
+                        x_col = 'MAX DIAMETER'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                    y_col = 'BREAK STRESS'
-                    x_col = 'RECORD'
-                    savedir = f"{extra_savepath}correlation_plot/"
-                    plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                        y_col = 'BREAK STRESS'
+                        x_col = 'RECORD'
+                        savedir = f"{extra_savepath}correlation_plot/"
+                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                except:
-                    print(f"\nERROR with {name}\n")
-                    continue
+                    except:
+                        print(f"\nERROR with {name}\n")
+                        continue
 
 
         # plotting single specific plots

@@ -16,16 +16,17 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
     """
     # Define columns to include
     base_columns = ['Date', 'Hair', 'Treatment', 'Name']
-    metric_columns = ['ELASTIC EMOD', 'ELASTIC GRADIENT', 'BREAK LOAD',
-                     'BREAK STRESS', 'TOUGHNESS']
+    metric_columns = ['ELASTIC EMOD', 
+                      'ELASTIC GRADIENT', 
+                      'BREAK STRESS', 
+                      'TOUGHNESS']
     
     # Define friendly names mapping
     metric_friendly_names = {
         'ELASTIC EMOD': 'Elastic Modulus',
         'ELASTIC GRADIENT': 'Elastic Gradient',
-        'BREAK LOAD': 'Break Load',
         'BREAK STRESS': 'Break Stress',
-        'TOUGHNESS': 'Toughness'
+        'TOUGHNESS': 'Toughness',
     }
     
     # Function to check if a name contains control-related words
@@ -33,8 +34,9 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
         control_terms = ['control', 'controls', 'ctrl']
         return any(term in name.lower() for term in control_terms)
     
-    # Get unique groups, excluding controls
-    groups = [name for name in df['Name'].unique() if not is_control_group(name)]
+    ## Get unique groups, excluding controls
+    #groups = [name for name in df['Name'].unique() if not is_control_group(name)]
+    groups = [name for name in df['Name'].unique()]
     
     # Create summary DataFrame
     summary_data = []
@@ -58,15 +60,14 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
         row_data = {col: group_data[col].iloc[0] for col in base_columns}
         
         # Initialize hair count variable
-        hair_count = None
+        hair_count = []
         
         # Calculate stats for each metric
         for metric in metric_columns:
             if metric in df.columns:
                 # Calculate hair count from the first metric where we remove outliers
-                if hair_count is None:
-                    cleaned_data, _ = remove_outliers(group_data[metric])
-                    hair_count = len(cleaned_data)
+                cleaned_data, _ = remove_outliers(group_data[metric])
+                hair_count.append(len(cleaned_data))
                 
                 metric_data = group_data[metric]
                 cleaned_data, _ = remove_outliers(metric_data)
@@ -105,7 +106,7 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
                 row_data[friendly_name] = f"{mean} ± {std} {sig_marker}"
         
         # Add hair count as the last column
-        row_data['# of hairs after outliers removal'] = hair_count
+        row_data['# of hairs after outliers removal'] = np.mean(hair_count)
         summary_data.append(row_data)
     
     # Create DataFrame from summary data
