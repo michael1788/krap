@@ -11,7 +11,7 @@ add_days() {
 }
 
 # Start date
-start_date="2024-12-02"
+start_date="2024-12-03"
 current_date="$start_date"
 
 # Get today's date in YYYY-MM-DD format

@@ -105,7 +105,7 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
                 row_data[friendly_name] = f"{mean} ± {std} {sig_marker}"
         
         # Add hair count as the last column
-        row_data['# of hairs after outliers removal'] = np.mean(hair_count)
+        row_data['Mean # of hairs after outliers removal (across metrics)'] = np.mean(hair_count)
         summary_data.append(row_data)
     
     # Create DataFrame from summary data

@@ -28,6 +28,8 @@ def parse_args():
     """Parses input arguments."""
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("--date", help="", type=str, required=True)
+    parser.add_argument("--specific_savepath", help="In case you need to save elsewhere than the default location", 
+                        type=str, required=False)
     parser.add_argument("--ordering", help="", type=str, required=False,
                         default="None")
     parser.add_argument("--sep_category", help="", type=str,required=False,
@@ -63,7 +65,10 @@ if __name__ == "__main__":
 
         # excel master file to log the summary
         # shared with oddity
-        path_excel_master = f"{args.root}/Pulling data/0_experiment_summary.xlsx"
+        if not args.specific_savepath:
+            path_excel_master = f"{args.root}/Pulling data/0_experiment_summary.xlsx"
+        elif args.specific_savepath:
+            path_excel_master = f"{args.specific_savepath}temp_hair_summary.xlsx"
 
         all_dfs = []
         all_fns = []
@@ -141,6 +146,7 @@ if __name__ == "__main__":
         # plotting triple sepcific plots
         if MODE == "triple":
             print("\n\nUpdating the master excel file")
+            print("Master file name: ", path_excel_master)
             try:
                 for df, name in zip(all_dfs, all_fns):
                     plotting.write_summary_stats(df, name, master_file=path_excel_master)
@@ -155,7 +161,10 @@ if __name__ == "__main__":
                     print(f"{name}\n")
                     print(f"df length: {len(df)}")
                     try:
-                        savepath = f"{root}{name}/"
+                        if args.specific_savepath is None:
+                            savepath = f"{root}{name}/"
+                        else:
+                            savepath = args.specific_savepath
                         if dev:
                             savepath = f"{root}dev/"
                         os.makedirs(savepath, exist_ok=True)
@@ -353,5 +362,7 @@ if __name__ == "__main__":
                 except:
                     print(f"\nERROR with {name}\n")
                     continue
-
-    print("\n\nplotting DONE\n\n")
+    if not args.summary_only:
+        print("\n\nPlotting and summary DONE\n\n")
+    elif args.summary_only:
+        print("\n\nSummary DONE\n\n")
