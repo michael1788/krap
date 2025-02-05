@@ -4,7 +4,7 @@ import argparse
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append("notebooks_2/")
+sys.path.append("/Users/michaelmoret/tinyverse/krap/notebooks_2/")
 import plotting as plotting
 
 def master_plots(df, header, ymin, ymax, savepath, show=False, verbose=False):
