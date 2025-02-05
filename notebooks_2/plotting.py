@@ -5,17 +5,19 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
-def write_summary_stats(df, master_file='experiment_summary.xlsx'):
+
+def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     """
     Write summary statistics to a master Excel file, with one line per experimental group.
     All metrics are written to the same sheet, and new data is appended to existing entries.
     
     Parameters:
     df (pandas.DataFrame): DataFrame containing the experimental data
+    filename (str): Name of the source file being analyzed
     master_file (str): Path to the master Excel file
     """
     # Define columns to include
-    base_columns = ['Date', 'Hair', 'Treatment', 'Name']
+    base_columns = ['Date', 'Filename', 'Hair', 'Treatment', 'Name']
     metric_columns = ['ELASTIC EMOD', 
                       'ELASTIC GRADIENT', 
                       'BREAK STRESS', 
@@ -34,9 +36,8 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
         control_terms = ['control', 'controls', 'ctrl']
         return any(term in name.lower() for term in control_terms)
     
-    ## Get unique groups, excluding controls
-    #groups = [name for name in df['Name'].unique() if not is_control_group(name)]
-    groups = [name for name in df['Name'].unique()]
+    # Get all unique groups (including controls)
+    groups = df['Name'].unique()
     
     # Create summary DataFrame
     summary_data = []
@@ -56,8 +57,9 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
     for group in groups:
         group_data = df[df['Name'] == group]
         
-        # Get the first occurrence of base columns
-        row_data = {col: group_data[col].iloc[0] for col in base_columns}
+        # Get the first occurrence of base columns and add filename
+        row_data = {col: group_data[col].iloc[0] if col != 'Filename' else filename 
+                   for col in base_columns}
         
         # Initialize hair count variable
         hair_count = []
@@ -65,12 +67,9 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
         # Calculate stats for each metric
         for metric in metric_columns:
             if metric in df.columns:
-                # Calculate hair count from the first metric where we remove outliers
+                # Remove outliers once and use for both counts and stats
                 cleaned_data, _ = remove_outliers(group_data[metric])
                 hair_count.append(len(cleaned_data))
-                
-                metric_data = group_data[metric]
-                cleaned_data, _ = remove_outliers(metric_data)
                 
                 # Calculate mean and std, rounded to 1 decimal places
                 mean = round(cleaned_data.mean(), 2)
@@ -117,9 +116,9 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
         try:
             existing_df = pd.read_excel(master_file)
             
-            # Identify new entries by checking Name and Date
-            existing_entries = existing_df.apply(lambda row: f"{row['Name']}_{row['Date']}", axis=1)
-            new_entries = new_summary_df.apply(lambda row: f"{row['Name']}_{row['Date']}", axis=1)
+            # Identify new entries by checking Name, Date and Filename
+            existing_entries = existing_df.apply(lambda row: f"{row['Name']}_{row['Date']}_{row['Filename']}", axis=1)
+            new_entries = new_summary_df.apply(lambda row: f"{row['Name']}_{row['Date']}_{row['Filename']}", axis=1)
             
             # Only append rows that don't exist yet
             mask = ~new_entries.isin(existing_entries)
@@ -133,12 +132,9 @@ def write_summary_stats(df, master_file='experiment_summary.xlsx'):
     else:
         combined_df = new_summary_df
     
-    # Sort by Date
-    combined_df = combined_df.sort_values('Date')
-    
     # Write to Excel
     combined_df.to_excel(master_file, index=False)
-    
+
 def reorder_by_names(df, name_list):
     """
     Groups rows by name and orders groups according to name_list

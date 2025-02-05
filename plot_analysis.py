@@ -56,6 +56,11 @@ if __name__ == "__main__":
         pathfile = f"Pulling data/{date}/{MODE}/"
         root = f"{args.root}/{pathfile}"
 
+        # if root does not exist, skip script
+        if not os.path.exists(root):
+            print(f"Path {root} does not exist")
+            continue
+
         # excel master file to log the summary
         # shared with oddity
         path_excel_master = f"{args.root}/Pulling data/0_experiment_summary.xlsx"
@@ -67,7 +72,7 @@ if __name__ == "__main__":
         for file in os.listdir(root):
             if file.endswith(".txt"):
                 print("\n*****************************")
-                print(file)
+                print("file: ", file)
                 
                 # clean the df
                 if MODE == "triple":
@@ -136,8 +141,12 @@ if __name__ == "__main__":
         # plotting triple sepcific plots
         if MODE == "triple":
             print("\n\nUpdating the master excel file")
-            plotting.write_summary_stats(df, 
-                                         master_file=path_excel_master)
+            try:
+                for df, name in zip(all_dfs, all_fns):
+                    plotting.write_summary_stats(df, name, master_file=path_excel_master)
+            except Exception as e:
+                print("Filename problem: ", file)
+                print(f"Error updating master file: {e}")
             
             if not args.summary_only:
                 print("\nplotting triple data")
@@ -261,7 +270,7 @@ if __name__ == "__main__":
 
 
         # plotting single specific plots
-        if MODE == "single":
+        if MODE == "single" and not args.summary_only:
             print("\n\nplotting single data")
             for df, name in zip(all_dfs, all_fns):
                 try:
