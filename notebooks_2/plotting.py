@@ -4,6 +4,7 @@ import scipy.stats
 from itertools import combinations
 import numpy as np
 import pandas as pd
+import traceback
 
 
 def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
@@ -195,25 +196,34 @@ def switch_units_single(df):
     return df
 
 def get_df_from_file(filepath, skip):
-    # First, read all lines as strings
-    raw_data = []
-    with open(filepath, 'r') as f:
-        # Skip the first skip lines
-        for _ in range(skip):
-            next(f)
-        # Read remaining lines
-        for line in f:
+    try:
+        # Read the entire file at once instead of line by line
+        with open(filepath, 'r', encoding='utf-8') as f:
+            # Convert to list to avoid iterator issues
+            all_lines = list(f)
+            
+        # Skip the header lines
+        data_lines = all_lines[skip:]
+        
+        # Process the data lines
+        raw_data = []
+        for line in data_lines:
             fields = line.strip().split('\t')
-            while len(fields) < 15:  # Pad with None if there are too few
-                fields.append(None)
+            # Pad with None if needed
+            fields.extend([None] * (15 - len(fields)))
             raw_data.append(fields)
 
-    # Convert to DataFrame with the same parameters you were using
-    df = pd.DataFrame(raw_data)
-    # Apply the same na_values treatment you had before
-    df = df.replace(['', 'NA', 'null'], np.nan)
-
-    return df
+        # Convert to DataFrame
+        df = pd.DataFrame(raw_data)
+        # Replace empty values and common NA indicators
+        df = df.replace(['', 'NA', 'null'], np.nan)
+        
+        return df
+        
+    except Exception as e:
+        print(f"Error reading file {filepath}: {e}")
+        print(f"Full traceback: {traceback.format_exc()}")
+        return None
 
 def replace_invalid_floats(df):
     """
