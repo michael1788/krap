@@ -42,17 +42,6 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     # Create summary DataFrame
     summary_data = []
     
-    # Function to remove outliers (same as in boxplot function)
-    def remove_outliers(data):
-        Q1 = data.quantile(0.25)
-        Q3 = data.quantile(0.75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
-        cleaned_data = data[(data >= lower_bound) & (data <= upper_bound)]
-        removed = data[(data < lower_bound) | (data > upper_bound)]
-        return cleaned_data, removed
-    
     # Perform statistical tests and calculate summary stats
     for group in groups:
         group_data = df[df['Name'] == group]
