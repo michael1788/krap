@@ -18,7 +18,7 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     master_file (str): Path to the master Excel file
     """
     # Define columns to include
-    base_columns = ['Date', 'Filename', 'Hair', 'Treatment', 'Name']
+    base_columns = ['Date', 'Filename', 'Hair', 'Treatment', 'Treatment time', 'Name']
     metric_columns = ['ELASTIC EMOD', 
                       'ELASTIC GRADIENT', 
                       'BREAK STRESS', 

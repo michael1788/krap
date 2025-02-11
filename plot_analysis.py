@@ -66,7 +66,7 @@ if __name__ == "__main__":
         # excel master file to log the summary
         # shared with oddity
         if not args.specific_savepath:
-            path_excel_master = f"{args.root}/Pulling data/0_experiment_summary.xlsx"
+            path_excel_master = f"{args.root}/Pulling data/1_experiment_summary_with_time.xlsx"
         elif args.specific_savepath:
             path_excel_master = f"{args.specific_savepath}temp_hair_summary.xlsx"
 
@@ -92,8 +92,11 @@ if __name__ == "__main__":
                     raise ValueError(f"Not a {MODE} experiment")
 
                 splitted_name = file.split(args.sep_category)
+                # get the treatment time
+                treatment_time = splitted_name[1]
+                df["Treatment time"] = treatment_time
                 # get the hair name and add it in the df
-                hair_name = splitted_name[1]
+                hair_name = splitted_name[2]
                 df["Hair"] = hair_name
                 # get the control condition
                 control = ""
@@ -107,7 +110,7 @@ if __name__ == "__main__":
 
                 # get the experiments; i.e. not the date
                 # not the single or triple etc
-                splitted_name = splitted_name[2:-1]
+                splitted_name = splitted_name[3:-1]
                 print("splitted_name: ", splitted_name)
                 # add the experiment name in the dataframe
                 all_names = []
