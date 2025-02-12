@@ -6,6 +6,11 @@ import numpy as np
 import pandas as pd
 import traceback
 
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from datetime import datetime
+import tempfile
+
 
 def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     """
@@ -415,7 +420,9 @@ def create_scatter_plot(df, x_col, y_col, save_dir=None, filename=None, figsize=
         plt.show()
         plt.close()
 
-def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(10, 6), verbose=False):
+def create_boxplot(df, metric_column, ymin, ymax, experiment_name, group_column='Name', 
+                   figsize=(10, 6), verbose=False):
+    
     """Create a compact boxplot with statistical test, median values, mean ± std, vertically stacked significance indicators,
     and individual data points (outliers removed)"""
     
@@ -585,7 +592,7 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     
     plt.suptitle('')
     plt.title('')
-    plt.xlabel('Experiment name', fontsize=10)
+    plt.xlabel(f'{experiment_name}', fontsize=10)
     plt.ylabel(metric_column.replace('_', ' ').title(), fontsize=10)
     ax.yaxis.grid(True, linestyle='--', alpha=0.3)
     
@@ -603,3 +610,89 @@ def create_boxplot(df, metric_column, ymin, ymax, group_column='Name', figsize=(
     plt.tight_layout()
     
     return fig, ax, all_removed
+
+########################
+# pdf / ppt functions
+
+def add_to_powerpoint(fig, title, pptx_path, experiment_name=None, analysis_date=None):
+    """
+    Add or update a matplotlib figure in a PowerPoint presentation.
+    If a slide with the same title exists, it will be updated rather than creating a new slide.
+    
+    Parameters:
+    -----------
+    fig : matplotlib.figure.Figure
+        The figure to add to the presentation
+    title : str
+        Base title for the slide (e.g., "Break Stress Analysis")
+    pptx_path : str
+        Path to the PowerPoint file
+    experiment_name : str, optional
+        Name of the experiment or treatment group
+    analysis_date : str
+        Date of the analysis in any format
+    """
+    if analysis_date is None:
+        raise ValueError("analysis_date must be provided")
+        
+    # Generate a unique slide title
+    full_title = title
+    if experiment_name:
+        full_title = f"{title} - {experiment_name}"
+    full_title = f"{full_title} ({analysis_date})"
+    
+    # Save the figure to a temporary file
+    temp_img_path = tempfile.NamedTemporaryFile(suffix='.png', delete=False).name
+    fig.savefig(temp_img_path, dpi=300, bbox_inches='tight')
+    
+    try:
+        if os.path.exists(pptx_path):
+            prs = Presentation(pptx_path)
+            
+            # Check each slide for matching title
+            for slide in prs.slides:
+                if hasattr(slide.shapes, 'title') and slide.shapes.title:
+                    if slide.shapes.title.text == full_title:
+                        # If matching slide found, delete all its shapes
+                        shape_ids = [shape.shape_id for shape in slide.shapes]
+                        for shape_id in shape_ids:
+                            shape = slide.shapes._spTree.find(f'.//*[@id="{shape_id}"]')
+                            if shape is not None:
+                                slide.shapes._spTree.remove(shape)
+                        
+                        # Add new title and image
+                        title_box = slide.shapes.title
+                        title_box.text = full_title
+                        title_box.text_frame.paragraphs[0].font.size = Pt(14)
+                        
+                        left = Inches(1)
+                        top = Inches(1.5)
+                        slide.shapes.add_picture(temp_img_path, left, top, height=Inches(5))
+                        
+                        prs.save(pptx_path)
+                        return
+        else:
+            prs = Presentation()
+            
+        # If we get here, either the file is new or no matching slide was found
+        # Use layout 5 (Title and Content)
+        slide_layout = prs.slide_layouts[5]
+        slide = prs.slides.add_slide(slide_layout)
+        
+        # Ensure title is added
+        if slide.shapes.title:
+            slide.shapes.title.text = full_title
+            slide.shapes.title.text_frame.paragraphs[0].font.size = Pt(14)
+        
+        # Add the image
+        left = Inches(1)
+        top = Inches(1.5)
+        slide.shapes.add_picture(temp_img_path, left, top, height=Inches(5))
+        
+        # Save the presentation
+        prs.save(pptx_path)
+        
+    finally:
+        # Clean up temporary file
+        if os.path.exists(temp_img_path):
+            os.remove(temp_img_path)

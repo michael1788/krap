@@ -1,14 +1,17 @@
-import os, sys
+import os
 import argparse
 
 import matplotlib
 import matplotlib.pyplot as plt
 
-sys.path.append("/Users/michaelmoret/tinyverse/krap/notebooks_2/")
 import plotting as plotting
 
-def master_plots(df, header, ymin, ymax, savepath, show=False, verbose=False):
-    fig, ax, removed = plotting.create_boxplot(df, header, ymin, ymax)
+def master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                 pptx_path=None,
+                 show=False, verbose=False):
+    
+    fig, ax, removed = plotting.create_boxplot(df, header, ymin, ymax,
+                                               experiment_name)
     # create folder specific for other stuff
     extra_savepath = f"{savepath}extra_information/"
     os.makedirs(extra_savepath, exist_ok=True)
@@ -21,6 +24,11 @@ def master_plots(df, header, ymin, ymax, savepath, show=False, verbose=False):
     if show: 
         plt.show()
         plt.close()
+
+    # we also add to a powerpoint 
+    if pptx_path:
+        plotting.add_to_powerpoint(fig, f"{header} Analysis", pptx_path, 
+                                   experiment_name, date)
 
     matplotlib.pyplot.close()
 
@@ -67,11 +75,14 @@ if __name__ == "__main__":
         # shared with oddity
         if not args.specific_savepath:
             path_excel_master = f"{args.root}/Pulling data/1_experiment_summary_with_time.xlsx"
+            path_pptx_master = f"{args.root}/Pulling data/1_break_stress.pptx"
         elif args.specific_savepath:
             path_excel_master = f"{args.specific_savepath}temp_hair_summary.xlsx"
+            path_pptx_master = f"{args.specific_savepath}temp_break_stress.pptx"
 
         all_dfs = []
         all_fns = []
+        all_exp_names = []
 
         # get the data and apply the cleaning
         for file in os.listdir(root):
@@ -143,8 +154,10 @@ if __name__ == "__main__":
                 if order is not None:
                     print("reordering")
                     df = plotting.reorder_by_names(df, order)
+                
                 all_dfs.append(df)
                 all_fns.append(file.replace(".txt", ""))
+                all_exp_names.append(f"{date} | {hair_name} | {treatment_time}")
 
         # plotting triple sepcific plots
         if MODE == "triple":
@@ -159,7 +172,7 @@ if __name__ == "__main__":
             
             if not args.summary_only:
                 print("\nplotting triple data")
-                for df, name in zip(all_dfs, all_fns):
+                for df, name, experiment_name in zip(all_dfs, all_fns, all_exp_names):
                     print("\n************************************")
                     print(f"{name}\n")
                     print(f"df length: {len(df)}")
@@ -180,7 +193,7 @@ if __name__ == "__main__":
                             else:
                                 ymin = 20
                                 ymax = 120
-                            master_plots(df, header, ymin, ymax, savepath)
+                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
                         except Exception as e:
                             print(f"ERROR with {header}")
                             print("Error:", e)
@@ -193,7 +206,8 @@ if __name__ == "__main__":
                             else:
                                 ymin = 120
                                 ymax = 280
-                            master_plots(df, header, ymin, ymax, savepath)
+                            master_plots(df, header, ymin, ymax, savepath, experiment_name, 
+                                         path_pptx_master)
                         except Exception as e:
                             print(f"ERROR with {header}")
                             print("Error:", e)
@@ -206,7 +220,7 @@ if __name__ == "__main__":
                             else:
                                 ymin = None
                                 ymax = None
-                            master_plots(df, header, ymin, ymax, savepath)
+                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
                         except Exception as e:
                             print(f"ERROR with {header}")
                             print("Error:", e)
@@ -219,7 +233,7 @@ if __name__ == "__main__":
                             else:
                                 ymin = 0
                                 ymax =  140
-                            master_plots(df, header, ymin, ymax, savepath)
+                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
                         except Exception as e:
                             print(f"ERROR with {header}")
                             print("Error:", e)
@@ -232,7 +246,7 @@ if __name__ == "__main__":
                             else:
                                 ymin = 2.5
                                 ymax =  6.0
-                            master_plots(df, header, ymin, ymax, savepath)
+                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
                         except Exception as e:
                             print(f"ERROR with {header}")
                             print("Error:", e)
@@ -284,7 +298,7 @@ if __name__ == "__main__":
         # plotting single specific plots
         if MODE == "single" and not args.summary_only:
             print("\n\nplotting single data")
-            for df, name in zip(all_dfs, all_fns):
+            for df, name, experiment_name in zip(all_dfs, all_fns, all_exp_names):
                 try:
                     savepath = f"{root}{name}/"
                     if dev:
@@ -299,7 +313,7 @@ if __name__ == "__main__":
                         else:
                             ymin = 90
                             ymax = 325
-                        master_plots(df, header, ymin, ymax, savepath)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
@@ -312,7 +326,7 @@ if __name__ == "__main__":
                         else:
                             ymin = 0
                             ymax = 100
-                        master_plots(df, header, ymin, ymax, savepath)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
@@ -325,7 +339,7 @@ if __name__ == "__main__":
                         else:
                             ymin = 0
                             ymax = 2.0
-                        master_plots(df, header, ymin, ymax, savepath)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
@@ -338,7 +352,7 @@ if __name__ == "__main__":
                         else:
                             ymin = 2.5
                             ymax = 8.0
-                        master_plots(df, header, ymin, ymax, savepath)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
