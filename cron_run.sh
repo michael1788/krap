@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Add logging
-exec 1> /Users/michaelmoret/cron_log.txt 2>&1
+exec 1> /Users/michaelmoret/tinyverse/krap/cron_log/log.log 2>&1
 
 # Check if Google Drive is mounted
 echo "$(date): Checking Google Drive mount..."
