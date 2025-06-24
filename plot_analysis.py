@@ -8,22 +8,26 @@ import plotting as plotting
 
 def master_plots(df, header, ymin, ymax, savepath, experiment_name,
                  pptx_path=None,
-                 show=False, verbose=False):
+                 show=False, 
+                 only_full_pptx_per_day=False,
+                 verbose=False):
     
     fig, ax, removed = plotting.create_boxplot(df, header, ymin, ymax,
                                                experiment_name)
-    # create folder specific for other stuff
-    extra_savepath = f"{savepath}extra_information/"
-    os.makedirs(extra_savepath, exist_ok=True)
-    #save removed data
-    removed.to_csv(f"{extra_savepath}{header}_removed.csv", index=True)
+    if not only_full_pptx_per_day:
+        # create folder specific for other stuff
+        extra_savepath = f"{savepath}extra_information/"
+        os.makedirs(extra_savepath, exist_ok=True)
+        #save removed data
+        removed.to_csv(f"{extra_savepath}{header}_removed.csv", index=True)
     if verbose:
         print(f"{len(removed)} removed data points for {header}")
     # plot
-    fig.savefig(f"{savepath}{header}.png")
-    if show: 
-        plt.show()
-        plt.close()
+    if not only_full_pptx_per_day:
+        fig.savefig(f"{savepath}{header}.png")
+        if show: 
+            plt.show()
+            plt.close()
 
     # we also add to a powerpoint 
     if pptx_path:
@@ -46,6 +50,9 @@ def parse_args():
                         default="%")
     parser.add_argument("--summary_only", action="store_true",
                     help="Only output the summary",
+                    default=False)
+    parser.add_argument("--only_full_pptx_per_day", action="store_true",
+                    help="Only output a pptx per day (and not daily data stuff)",
                     default=False)
     parser.add_argument("--root", help="", type=str, required=False,
                         default=f"/Users/michaelmoret/Library/CloudStorage/GoogleDrive-michael@externa.bio/.shortcut-targets-by-id/1BdUNsBjDh5Gee_76jCiKB1C_CwG0ercP")
@@ -79,6 +86,11 @@ if __name__ == "__main__":
         elif args.specific_savepath:
             path_excel_master = f"{args.specific_savepath}temp_hair_summary.xlsx"
             path_pptx_master = f"{args.specific_savepath}temp_break_stress.pptx"
+    
+        # we override the paths if we only want to save one pptx per day
+        if args.only_full_pptx_per_day:
+            path_excel_master = f"{args.root}Pulling data/ppt_per_day/summary.xlsx"
+            path_pptx_master = f"{args.root}Pulling data/ppt_per_day/{date}.pptx"
 
         all_dfs = []
         all_fns = []
@@ -185,18 +197,20 @@ if __name__ == "__main__":
                             savepath = f"{root}dev/"
                         os.makedirs(savepath, exist_ok=True)
                         
-                        try:
-                            header = 'MEAN DIAMETER'
-                            if y_none:
-                                ymin = None
-                                ymax = None
-                            else:
-                                ymin = 20
-                                ymax = 120
-                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
-                        except Exception as e:
-                            print(f"ERROR with {header}")
-                            print("Error:", e)
+                        if not args.only_full_pptx_per_day:
+                            try:
+                                header = 'MEAN DIAMETER'
+                                if y_none:
+                                    ymin = None
+                                    ymax = None
+                                else:
+                                    ymin = 20
+                                    ymax = 120
+                                master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                            only_full_pptx_per_day=args.only_full_pptx_per_day)
+                            except Exception as e:
+                                print(f"ERROR with {header}")
+                                print("Error:", e)
 
                         try:
                             header = 'BREAK STRESS'
@@ -207,88 +221,96 @@ if __name__ == "__main__":
                                 ymin = 120
                                 ymax = 280
                             master_plots(df, header, ymin, ymax, savepath, experiment_name, 
-                                         path_pptx_master)
+                                         path_pptx_master,
+                                         only_full_pptx_per_day=args.only_full_pptx_per_day)
                         except Exception as e:
                             print(f"ERROR with {header}")
                             print("Error:", e)
 
-                        try:
-                            header = 'TOUGHNESS'
-                            if y_none:
-                                ymin = None
-                                ymax = None
-                            else:
-                                ymin = None
-                                ymax = None
-                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
-                        except Exception as e:
-                            print(f"ERROR with {header}")
-                            print("Error:", e)
+                        if not args.only_full_pptx_per_day:
+                            try:
+                                header = 'TOUGHNESS'
+                                if y_none:
+                                    ymin = None
+                                    ymax = None
+                                else:
+                                    ymin = None
+                                    ymax = None
+                                master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                            only_full_pptx_per_day=args.only_full_pptx_per_day)
+                            except Exception as e:
+                                print(f"ERROR with {header}")
+                                print("Error:", e)
                         
-                        try:
-                            header = 'ELASTIC GRADIENT'
-                            if y_none:
-                                ymin = None
-                                ymax = None
-                            else:
-                                ymin = 0
-                                ymax =  140
-                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
-                        except Exception as e:
-                            print(f"ERROR with {header}")
-                            print("Error:", e)
+                        if not args.only_full_pptx_per_day:
+                            try:
+                                header = 'ELASTIC GRADIENT'
+                                if y_none:
+                                    ymin = None
+                                    ymax = None
+                                else:
+                                    ymin = 0
+                                    ymax =  140
+                                master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                            only_full_pptx_per_day=args.only_full_pptx_per_day)
+                            except Exception as e:
+                                print(f"ERROR with {header}")
+                                print("Error:", e)
 
-                        try:
-                            header = 'ELASTIC EMOD'
-                            if y_none:
-                                ymin = None
-                                ymax = None
-                            else:
-                                ymin = 2.5
-                                ymax =  6.0
-                            master_plots(df, header, ymin, ymax, savepath, experiment_name)
-                        except Exception as e:
-                            print(f"ERROR with {header}")
-                            print("Error:", e)
+                        if not args.only_full_pptx_per_day:
+                            try:
+                                header = 'ELASTIC EMOD'
+                                if y_none:
+                                    ymin = None
+                                    ymax = None
+                                else:
+                                    ymin = 2.5
+                                    ymax =  6.0
+                                master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                            only_full_pptx_per_day=args.only_full_pptx_per_day)
+                            except Exception as e:
+                                print(f"ERROR with {header}")
+                                print("Error:", e)
 
-                        # scatter plots
-                        extra_savepath = f"{savepath}extra_information/"
-                        os.makedirs(extra_savepath, exist_ok=True)
+                        if not args.only_full_pptx_per_day:
+                            # scatter plots
+                            extra_savepath = f"{savepath}extra_information/"
+                            os.makedirs(extra_savepath, exist_ok=True)
 
-                        y_col = 'ELASTIC EMOD'
-                        x_col = 'MEAN DIAMETER'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'ELASTIC EMOD'
+                            x_col = 'MEAN DIAMETER'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                        y_col = 'ELASTIC EMOD'
-                        x_col = 'MIN DIAMETER'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'ELASTIC EMOD'
+                            x_col = 'MIN DIAMETER'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                        y_col = 'ELASTIC EMOD'
-                        x_col = 'MAX DIAMETER'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'ELASTIC EMOD'
+                            x_col = 'MAX DIAMETER'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                        y_col = 'BREAK STRESS'
-                        x_col = 'MEAN DIAMETER'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'BREAK STRESS'
+                            x_col = 'MEAN DIAMETER'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                        y_col = 'BREAK STRESS'
-                        x_col = 'MIN DIAMETER'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'BREAK STRESS'
+                            x_col = 'MIN DIAMETER'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                        y_col = 'BREAK STRESS'
-                        x_col = 'MAX DIAMETER'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'BREAK STRESS'
+                            x_col = 'MAX DIAMETER'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
-                        y_col = 'BREAK STRESS'
-                        x_col = 'RECORD'
-                        savedir = f"{extra_savepath}correlation_plot/"
-                        plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
+                            y_col = 'BREAK STRESS'
+                            x_col = 'RECORD'
+                            savedir = f"{extra_savepath}correlation_plot/"
+                            plt = plotting.create_scatter_plot(df, x_col, y_col, savedir)
 
                     except:
                         print(f"\nERROR with {name}\n")
@@ -296,7 +318,7 @@ if __name__ == "__main__":
 
 
         # plotting single specific plots
-        if MODE == "single" and not args.summary_only:
+        if MODE == "single" and not args.summary_only and not args.only_full_pptx_per_day:
             print("\n\nplotting single data")
             for df, name, experiment_name in zip(all_dfs, all_fns, all_exp_names):
                 try:
@@ -313,7 +335,8 @@ if __name__ == "__main__":
                         else:
                             ymin = 90
                             ymax = 325
-                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                     only_full_pptx_per_day=args.only_full_pptx_per_day)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
@@ -326,7 +349,8 @@ if __name__ == "__main__":
                         else:
                             ymin = 0
                             ymax = 100
-                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                     only_full_pptx_per_day=args.only_full_pptx_per_day)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
@@ -339,7 +363,8 @@ if __name__ == "__main__":
                         else:
                             ymin = 0
                             ymax = 2.0
-                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                     only_full_pptx_per_day=args.only_full_pptx_per_day)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)
@@ -352,7 +377,8 @@ if __name__ == "__main__":
                         else:
                             ymin = 2.5
                             ymax = 8.0
-                        master_plots(df, header, ymin, ymax, savepath, experiment_name)
+                        master_plots(df, header, ymin, ymax, savepath, experiment_name,
+                                     only_full_pptx_per_day=args.only_full_pptx_per_day)
                     except Exception as e:
                         print(f"ERROR with {header}")
                         print("Error:", e)

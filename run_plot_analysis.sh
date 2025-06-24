@@ -3,4 +3,4 @@
 source ~/.zshrc
 conda activate krap
 
-python plot_analysis.py --date 25-02-13
+python plot_analysis.py --date 25-06-23

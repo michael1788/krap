@@ -189,6 +189,7 @@ def add_missing_records(df):
 def switch_units_triple(df):
     # multiple all the values in the column
     # BREAK STRESS by 10^6/101.971621297792 / comes from what Devora was doing in her file
+    # note from June 23, 2025: it's to make units in Newton the weird 101.97 ...
     df['BREAK STRESS'] = df['BREAK STRESS'] * 10**6/101.971621297792
     # and EMOD to gigapascal
     df['ELASTIC EMOD'] = df['ELASTIC EMOD'] * 1e-9

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source ~/.zshrc
+conda activate krap
+
 # Function to format date as YY-MM-DD
 format_date() {
     date -j -f "%Y-%m-%d" "$1" "+%y-%m-%d"
@@ -11,7 +14,7 @@ add_days() {
 }
 
 # Start date
-start_date="2024-12-03"
+start_date="2025-03-03"
 current_date="$start_date"
 
 # Get today's date in YYYY-MM-DD format
