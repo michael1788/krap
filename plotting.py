@@ -15,26 +15,26 @@ import tempfile
 def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     """
     Write summary statistics to a master Excel file, with one line per experimental group.
-    All metrics are written to the same sheet, and new data is appended to existing entries.
+    Control values are included as separate columns next to treatment values.
     
     Parameters:
     df (pandas.DataFrame): DataFrame containing the experimental data
     filename (str): Name of the source file being analyzed
     master_file (str): Path to the master Excel file
     """
+    import pandas as pd
+    import numpy as np
+    import scipy.stats
+    import os
+    from openpyxl import load_workbook
+    
     # Define columns to include
     base_columns = ['Date', 'Filename', 'Hair', 'Treatment', 'Treatment time', 'Name']
-    metric_columns = ['ELASTIC EMOD', 
-                      'ELASTIC GRADIENT', 
-                      'BREAK STRESS', 
-                      'TOUGHNESS']
+    metric_columns = ['BREAK STRESS']
     
     # Define friendly names mapping
     metric_friendly_names = {
-        'ELASTIC EMOD': 'Elastic Modulus',
-        'ELASTIC GRADIENT': 'Elastic Gradient',
         'BREAK STRESS': 'Break Stress',
-        'TOUGHNESS': 'Toughness',
     }
     
     # Function to check if a name contains control-related words
@@ -42,14 +42,16 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
         control_terms = ['control', 'controls', 'ctrl']
         return any(term in name.lower() for term in control_terms)
     
-    # Get all unique groups (including controls)
-    groups = df['Name'].unique()
+    # Get all unique groups and separate control from treatment groups
+    all_groups = df['Name'].unique()
+    control_groups = [group for group in all_groups if is_control_group(group)]
+    treatment_groups = [group for group in all_groups if not is_control_group(group)]
     
     # Create summary DataFrame
     summary_data = []
     
-    # Perform statistical tests and calculate summary stats
-    for group in groups:
+    # Process each treatment group
+    for group in treatment_groups:
         group_data = df[df['Name'] == group]
         
         # Get the first occurrence of base columns and add filename
@@ -62,46 +64,68 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
         # Calculate stats for each metric
         for metric in metric_columns:
             if metric in df.columns:
-                # Remove outliers once and use for both counts and stats
+                # Remove outliers for treatment group
                 cleaned_data, _ = remove_outliers(group_data[metric])
                 hair_count.append(len(cleaned_data))
                 
-                # Calculate mean and std, rounded to 1 decimal places
-                mean = round(cleaned_data.mean(), 2)
-                std = round(cleaned_data.std(), 1)
+                # Calculate mean and std for treatment group
+                treatment_mean = round(cleaned_data.mean(), 2)
+                treatment_std = round(cleaned_data.std(), 2)
                 
                 # Get friendly name for the metric
                 friendly_name = metric_friendly_names[metric]
                 
-                # Perform statistical test against control
-                control_group = next((name for name in df['Name'].unique() 
-                                   if is_control_group(name)), None)
+                # Find corresponding control group and calculate its stats
+                control_mean = None
+                control_std = None
+                control_count = None
+                p_value = None
                 
-                # Initialize significance marker
-                sig_marker = ''
-                
-                if control_group:
+                if control_groups:
+                    # Use the first control group found (you might want to refine this logic)
+                    control_group = control_groups[0]
                     control_data = df[df['Name'] == control_group][metric]
                     control_cleaned, _ = remove_outliers(control_data)
                     
-                    # Perform Mann-Whitney U test
-                    stat, p_value = scipy.stats.mannwhitneyu(cleaned_data, control_cleaned, 
-                                                     alternative='two-sided')
-                    
-                    # Set significance markers
-                    if p_value < 0.001:
-                        sig_marker = '***'
-                    elif p_value < 0.01:
-                        sig_marker = '**'
-                    elif p_value < 0.05:
-                        sig_marker = '*'
+                    if len(control_cleaned) > 0:
+                        control_mean = round(control_cleaned.mean(), 2)
+                        control_std = round(control_cleaned.std(), 2)
+                        control_count = len(control_cleaned)
+                        
+                        # Perform statistical test between treatment and control
+                        if len(cleaned_data) > 0:
+                            try:
+                                # Perform Mann-Whitney U test
+                                stat, p_value = scipy.stats.mannwhitneyu(cleaned_data, control_cleaned, 
+                                                                 alternative='two-sided')
+                                # Round p-value to 4 decimal places
+                                p_value = round(p_value, 4)
+                            except Exception as e:
+                                print(f"Statistical test failed for {group} vs {control_group}: {e}")
+                                p_value = None
                 
-                # Combine mean, std, and significance into one column
-                row_data[friendly_name] = f"{mean} ± {std} {sig_marker}"
+                # Store treatment values
+                row_data[f'{friendly_name} Mean'] = treatment_mean
+                row_data[f'{friendly_name} Std'] = treatment_std
+                row_data[f'{friendly_name} Count'] = len(cleaned_data)
+                
+                # Store control values in adjacent columns
+                row_data[f'{friendly_name} Control Mean'] = control_mean
+                row_data[f'{friendly_name} Control Std'] = control_std
+                row_data[f'{friendly_name} Control Count'] = control_count
+                
+                # Store p-value
+                row_data[f'{friendly_name} p-value'] = p_value
         
         # Add hair count as the last column
-        row_data['Mean # of hairs after outliers removal (across metrics)'] = np.mean(hair_count)
+        if hair_count:
+            row_data['Mean # of hairs after outliers removal (across metrics)'] = round(np.mean(hair_count), 1)
+        else:
+            row_data['Mean # of hairs after outliers removal (across metrics)'] = 0
+            
         summary_data.append(row_data)
+    
+
     
     # Create DataFrame from summary data
     new_summary_df = pd.DataFrame(summary_data)
@@ -109,26 +133,53 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     # Load existing file and append new data
     if os.path.exists(master_file):
         try:
+            # Read existing data
             existing_df = pd.read_excel(master_file)
             
-            # Identify new entries by checking Name, Date and Filename
-            existing_entries = existing_df.apply(lambda row: f"{row['Name']}_{row['Date']}_{row['Filename']}", axis=1)
-            new_entries = new_summary_df.apply(lambda row: f"{row['Name']}_{row['Date']}_{row['Filename']}", axis=1)
+            # Create unique identifiers for comparison
+            # Use a more robust comparison that handles potential data type issues
+            def create_identifier(row):
+                return f"{str(row['Name'])}_{str(row['Date'])}_{str(row['Filename'])}"
             
-            # Only append rows that don't exist yet
-            mask = ~new_entries.isin(existing_entries)
-            if mask.any():
-                combined_df = pd.concat([existing_df, new_summary_df[mask]], ignore_index=True)
+            existing_identifiers = set(existing_df.apply(create_identifier, axis=1))
+            new_identifiers = new_summary_df.apply(create_identifier, axis=1)
+            
+            # Filter out entries that already exist
+            mask = ~new_identifiers.isin(existing_identifiers)
+            new_entries_to_add = new_summary_df[mask]
+            
+            if len(new_entries_to_add) > 0:
+                print(f"Adding {len(new_entries_to_add)} new entries to {master_file}")
+                # Use pd.concat instead of append (which is deprecated)
+                combined_df = pd.concat([existing_df, new_entries_to_add], ignore_index=True)
             else:
+                print(f"No new entries to add for {filename}")
                 combined_df = existing_df
+                
         except Exception as e:
-            print(f"Error reading existing file: {e}")
+            print(f"Error reading existing file {master_file}: {e}")
+            print("Creating new file with current data")
             combined_df = new_summary_df
     else:
+        print(f"Creating new master file: {master_file}")
         combined_df = new_summary_df
     
-    # Write to Excel
-    combined_df.to_excel(master_file, index=False)
+    try:
+        # Write to Excel with error handling
+        combined_df.to_excel(master_file, index=False, engine='openpyxl')
+        print(f"Successfully updated {master_file}")
+    except PermissionError:
+        print(f"Permission denied writing to {master_file}. Make sure the file is not open in Excel.")
+        # Try with a backup filename
+        backup_file = master_file.replace('.xlsx', '_backup.xlsx')
+        combined_df.to_excel(backup_file, index=False, engine='openpyxl')
+        print(f"Data saved to backup file: {backup_file}")
+    except Exception as e:
+        print(f"Error writing to Excel file: {e}")
+        # Save as CSV as fallback
+        csv_file = master_file.replace('.xlsx', '.csv')
+        combined_df.to_csv(csv_file, index=False)
+        print(f"Data saved as CSV: {csv_file}")
 
 def reorder_by_names(df, name_list):
     """
