@@ -11,7 +11,6 @@ from pptx.util import Inches, Pt
 from datetime import datetime
 import tempfile
 
-
 def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     """
     Write summary statistics to a master Excel file, with one line per experimental group.
@@ -142,24 +141,50 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
             # Read existing data
             existing_df = pd.read_excel(master_file)
             
-            # Create unique identifiers for comparison
-            # Use a more robust comparison that handles potential data type issues
-            def create_identifier(row):
-                return f"{str(row['Name'])}_{str(row['Date'])}_{str(row['Filename'])}"
+            # Function to check if a row already exists by comparing all values
+            def row_exists(new_row, existing_df):
+                for _, existing_row in existing_df.iterrows():
+                    # Compare all columns that exist in both rows
+                    match = True
+                    for col in new_row.index:
+                        if col in existing_row.index:
+                            # Handle NaN values and convert to strings for comparison
+                            new_val = str(new_row[col]) if pd.notna(new_row[col]) else 'nan'
+                            existing_val = str(existing_row[col]) if pd.notna(existing_row[col]) else 'nan'
+                            if new_val != existing_val:
+                                match = False
+                                break
+                        else:
+                            # Column doesn't exist in existing data, consider as no match
+                            match = False
+                            break
+                    if match:
+                        return True
+                return False
             
-            existing_identifiers = set(existing_df.apply(create_identifier, axis=1))
-            new_identifiers = new_summary_df.apply(create_identifier, axis=1)
+            # Filter out entries that already exist by checking all row values
+            new_entries_to_add = []
+            duplicate_count = 0
             
-            # Filter out entries that already exist
-            mask = ~new_identifiers.isin(existing_identifiers)
-            new_entries_to_add = new_summary_df[mask]
+            for _, new_row in new_summary_df.iterrows():
+                if not row_exists(new_row, existing_df):
+                    new_entries_to_add.append(new_row)
+                else:
+                    duplicate_count += 1
             
             if len(new_entries_to_add) > 0:
                 print(f"Adding {len(new_entries_to_add)} new entries to {master_file}")
+                if duplicate_count > 0:
+                    print(f"Skipped {duplicate_count} duplicate entries")
+                # Convert list back to DataFrame
+                new_entries_df = pd.DataFrame(new_entries_to_add)
                 # Use pd.concat instead of append (which is deprecated)
-                combined_df = pd.concat([existing_df, new_entries_to_add], ignore_index=True)
+                combined_df = pd.concat([existing_df, new_entries_df], ignore_index=True)
             else:
-                print(f"No new entries to add for {filename}")
+                if duplicate_count > 0:
+                    print(f"No new entries to add for {filename} - all {duplicate_count} entries already exist")
+                else:
+                    print(f"No new entries to add for {filename}")
                 combined_df = existing_df
                 
         except Exception as e:
@@ -186,6 +211,7 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
         csv_file = master_file.replace('.xlsx', '.csv')
         combined_df.to_csv(csv_file, index=False)
         print(f"Data saved as CSV: {csv_file}")
+
 def reorder_by_names(df, name_list):
     """
     Groups rows by name and orders groups according to name_list
