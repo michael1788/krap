@@ -39,7 +39,7 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
     
     # Function to check if a name contains control-related words
     def is_control_group(name):
-        control_terms = ['control', 'controls', 'ctrl']
+        control_terms = ['control', 'controls', 'ctrl', 'base', 'wash']
         return any(term in name.lower() for term in control_terms)
     
     # Get all unique groups and separate control from treatment groups
@@ -60,6 +60,9 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
         
         # Initialize hair count variable
         hair_count = []
+        
+        # Initialize control group name variable
+        control_group_used = None
         
         # Calculate stats for each metric
         for metric in metric_columns:
@@ -84,6 +87,7 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
                 if control_groups:
                     # Use the first control group found (you might want to refine this logic)
                     control_group = control_groups[0]
+                    control_group_used = control_group  # Store the control group name
                     control_data = df[df['Name'] == control_group][metric]
                     control_cleaned, _ = remove_outliers(control_data)
                     
@@ -117,6 +121,9 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
                 # Store p-value
                 row_data[f'{friendly_name} p-value'] = p_value
         
+        # Add control group name
+        row_data['Control Group Used'] = control_group_used
+        
         # Add hair count as the last column
         if hair_count:
             row_data['Mean # of hairs after outliers removal (across metrics)'] = round(np.mean(hair_count), 1)
@@ -124,7 +131,6 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
             row_data['Mean # of hairs after outliers removal (across metrics)'] = 0
             
         summary_data.append(row_data)
-    
 
     
     # Create DataFrame from summary data
@@ -180,7 +186,6 @@ def write_summary_stats(df, filename, master_file='experiment_summary.xlsx'):
         csv_file = master_file.replace('.xlsx', '.csv')
         combined_df.to_csv(csv_file, index=False)
         print(f"Data saved as CSV: {csv_file}")
-
 def reorder_by_names(df, name_list):
     """
     Groups rows by name and orders groups according to name_list

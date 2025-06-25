@@ -4,7 +4,7 @@ source ~/.zshrc
 conda activate krap
 
 # Start date
-start_date="2025-02-06"
+start_date="2025-05-05"
 # End date (today)
 end_date=$(date +"%Y-%m-%d")
 
@@ -21,9 +21,8 @@ while [ $current_seconds -le $end_seconds ]; do
     echo "Processing date: $current_date"
     
     # Run the Python script with the current date - fixed argument passing
-    python plot_analysis.py --date "$current_date" \
-                            --only_full_pptx_per_day
-    
+    python plot_analysis.py --date "$current_date"
+        
     # Move to the next day (add 86400 seconds = 1 day)
     current_seconds=$((current_seconds + 86400))
 done
