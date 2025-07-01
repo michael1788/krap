@@ -15,6 +15,7 @@ add_days() {
 
 # Start date
 # # first day with treatment time in title: 25-02-06
+# year, month, day
 start_date="2025-02-06"
 current_date="$start_date"
 
